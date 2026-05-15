@@ -1,0 +1,97 @@
+{
+  "monsters": [
+    {
+      "id": "monster_boss_001",
+      "name": "花叶兽",
+      "element": "grass",
+      "rarity": 5,
+      "isBoss": true,
+      "baseHP": 500,
+      "baseATK": 45,
+      "baseDEF": 35,
+      "baseSPD": 12,
+      "skill": "花叶风暴",
+      "skillCost": 10,
+      "skillMultiplier": 2.8
+    },
+    {
+      "id": "monster_boss_002",
+      "name": "烈焰龙",
+      "element": "fire",
+      "rarity": 5,
+      "isBoss": true,
+      "baseHP": 800,
+      "baseATK": 60,
+      "baseDEF": 40,
+      "baseSPD": 10,
+      "skill": "烈焰吐息",
+      "skillCost": 12,
+      "skillMultiplier": 3.2
+    },
+    {
+      "id": "monster_001",
+      "name": "小火龙",
+      "element": "fire",
+      "rarity": 2,
+      "baseHP": 120,
+      "baseATK": 35,
+      "baseDEF": 20,
+      "baseSPD": 15,
+      "skill": "火焰冲击",
+      "skillCost": 8,
+      "skillMultiplier": 2.5
+    },
+    {
+      "id": "monster_002",
+      "name": "水龟仔",
+      "element": "water",
+      "rarity": 2,
+      "baseHP": 130,
+      "baseATK": 28,
+      "baseDEF": 30,
+      "baseSPD": 12,
+      "skill": "水之护盾",
+      "skillCost": 7,
+      "skillMultiplier": 2.0
+    },
+    {
+      "id": "monster_003",
+      "name": "草苗儿",
+      "element": "grass",
+      "rarity": 2,
+      "baseHP": 110,
+      "baseATK": 30,
+      "baseDEF": 25,
+      "baseSPD": 18,
+      "skill": "藤鞭抽打",
+      "skillCost": 6,
+      "skillMultiplier": 2.2
+    },
+    {
+      "id": "monster_004",
+      "name": "雷小鼠",
+      "element": "thunder",
+      "rarity": 2,
+      "baseHP": 100,
+      "baseATK": 40,
+      "baseDEF": 15,
+      "baseSPD": 25,
+      "skill": "雷电箭",
+      "skillCost": 9,
+      "skillMultiplier": 3.0
+    },
+    {
+      "id": "monster_005",
+      "name": "光精灵",
+      "element": "light",
+      "rarity": 2,
+      "baseHP": 90,
+      "baseATK": 38,
+      "baseDEF": 18,
+      "baseSPD": 22,
+      "skill": "星光爆裂",
+      "skillCost": 10,
+      "skillMultiplier": 3.5
+    }
+  ]
+}
