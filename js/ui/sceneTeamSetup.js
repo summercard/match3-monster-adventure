@@ -360,11 +360,10 @@ export class SceneTeamSetup {
     r.fillRect(0, 0, this.designW, this.designH, COLORS.bgMedium)
 
     // 标题
-    r.fillText('⚙️ 队伍编成', this.designW / 2, 40, COLORS.textPrimary, 18, 'bold')
+    r.fillText('⚙️ 队伍编成', this.designW / 2, 40, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
 
     // 返回按钮
-    r.fillRoundRect(this.backBtn.x, this.backBtn.y, this.backBtn.w, this.backBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('← 返回', this.backBtn.x + this.backBtn.w / 2, this.backBtn.y + 20, COLORS.textPrimary, 12)
+    r.drawButton({ x: this.backBtn.x, y: this.backBtn.y, w: this.backBtn.w, h: this.backBtn.h, text: '← 返回' }, 'secondary')
 
     // 渲染空队伍引导提示
     this._renderEmptyGuide(r)
@@ -380,7 +379,7 @@ export class SceneTeamSetup {
     r.fillRect(this.margin, 170, this.designW - this.margin * 2, 1, COLORS.disabledBg)
 
     // 怪物列表标题
-    r.fillText('📋 已收服怪物', this.designW / 2, 195, COLORS.textSecondary, 12)
+    r.fillText('📋 已收服怪物', this.designW / 2, 195, COLORS.textSecondary, THEME.font.small.size)
 
     // 渲染怪物列表
     this._renderMonsterList(r)
@@ -401,7 +400,7 @@ export class SceneTeamSetup {
     // 闪烁效果
     const alpha = 0.6 + Math.sin(this.animState.guideTimer * 3) * 0.4
 
-    r.fillText('💡 点击开始冒险，赢取你的第一只怪物！', this.designW / 2, 55, `rgba(255,215,0,${alpha})`, 11)
+    r.fillText('💡 点击开始冒险，赢取你的第一只怪物！', this.designW / 2, 55, `rgba(255,215,0,${alpha})`, THEME.font.tiny.size)
   }
 
   _renderPowerDisplay(r, power) {
@@ -415,7 +414,7 @@ export class SceneTeamSetup {
       powerColor = `rgb(${r},${g},50)`
     }
 
-    r.fillText(`队伍总战力: ${power}`, this.designW / 2, 155, powerColor, 13, 'bold')
+    r.fillText(`队伍总战力: ${power}`, this.designW / 2, 155, powerColor, THEME.font.small.size, 'bold')
   }
 
   _renderTeamSlots(r) {
@@ -502,39 +501,39 @@ export class SceneTeamSetup {
       }
 
       // 怪物图标
-      r.fillText(monster.emoji, cx, cy - 15, COLORS.textPrimary, 28)
+      r.fillText(monster.emoji, cx, cy - 15, COLORS.textPrimary, THEME.font.icon.size)
       // 名字
-      r.fillText(monster.name, cx, cy + 8, COLORS.textPrimary, 10, 'bold')
+      r.fillText(monster.name, cx, cy + 8, COLORS.textPrimary, THEME.font.tiny.size, 'bold')
 
       // 等级（读取真实等级而非写死Lv.1）
       const realLevel = this.game.storage.getMonsterLevel(monsterId) || 1
-      r.fillText(`Lv.${realLevel}`, cx, cy + 23, COLORS.textMuted, 9)
+      r.fillText(`Lv.${realLevel}`, cx, cy + 23, COLORS.textMuted, THEME.font.tiny.size)
 
       // 性格标签
       const natureId = this.game.storage.getMonsterNature(monsterId)
       const nature = natureId ? getNature(natureId) : null
       if (nature) {
-        r.fillText(`${nature.emoji}${nature.name}`, cx, cy + 35, COLORS.gold, 8)
+        r.fillText(`${nature.emoji}${nature.name}`, cx, cy + 35, COLORS.gold, THEME.font.tiny.size)
       }
       // 属性标签
       const tagColor = THEME.colors.elementColors[monster.element] || COLORS.textMuted
       r.fillRoundRect(newX + 5, newY + 5, 28, 14, THEME.radius.sm - 2, tagColor)
-      r.fillText(this._getElementName(monster.element), newX + 19, newY + 14, COLORS.textPrimary, 8)
+      r.fillText(this._getElementName(monster.element), newX + 19, newY + 14, COLORS.textPrimary, THEME.font.tiny.size)
       // 槽位标签
-      r.fillText(slot.label, cx, newY + newH - 12, COLORS.textMuted, 9)
+      r.fillText(slot.label, cx, newY + newH - 12, COLORS.textMuted, THEME.font.tiny.size)
 
       // 队长技能显示（仅队长槽位 + 有怪物的场合）
       if (slot.key === 'leader' && monster.leaderSkill) {
         const skill = getLeaderSkill(monster.leaderSkill)
         if (skill) {
           // 技能名称（金色小字）
-          r.fillText(`${skill.icon}${skill.name}`, cx, newY + newH + 10, COLORS.gold, 8, 'bold')
+          r.fillText(`${skill.icon}${skill.name}`, cx, newY + newH + 10, COLORS.gold, THEME.font.tiny.size, 'bold')
           // 技能效果描述
-          r.fillText(skill.desc, cx, newY + newH + 22, COLORS.textSecondary, 7)
+          r.fillText(skill.desc, cx, newY + newH + 22, COLORS.textSecondary, THEME.font.tiny.size)
         }
       } else if (slot.key === 'leader' && monster && !monster.leaderSkill) {
         // 队长位但怪物没有队长技能
-        r.fillText('(无队长技能)', cx, newY + newH + 10, COLORS.textMuted, 7)
+        r.fillText('(无队长技能)', cx, newY + newH + 10, COLORS.textMuted, THEME.font.tiny.size)
       }
     } else {
       // 空槽位
@@ -562,12 +561,12 @@ export class SceneTeamSetup {
       const label = isLeader ? '队长' : '成员'
 
       const textColor = isSelected ? COLORS.gold : COLORS.textDark
-      r.fillText(emoji, cx, cy - 15, textColor, 24)
-      r.fillText(isSelected ? '选择怪物' : label, cx, cy + 5, textColor, 10)
-      r.fillText(isLeader ? '点击后将填入此处' : '', cx, cy + 20, COLORS.textMuted, 8)
+      r.fillText(emoji, cx, cy - 15, textColor, THEME.font.icon.size)
+      r.fillText(isSelected ? '选择怪物' : label, cx, cy + 5, textColor, THEME.font.tiny.size)
+      r.fillText(isLeader ? '点击后将填入此处' : '', cx, cy + 20, COLORS.textMuted, THEME.font.tiny.size)
 
       // 槽位标签
-      r.fillText(slot.label, cx, slot.y + slot.h - 12, COLORS.textMuted, 9)
+      r.fillText(slot.label, cx, slot.y + slot.h - 12, COLORS.textMuted, THEME.font.tiny.size)
     }
   }
 
@@ -603,42 +602,42 @@ export class SceneTeamSetup {
       if (inTeam && teamSlot) {
         const slotLabel = teamSlot === 'leader' ? '队长' : (teamSlot === 'member1' ? '成员1' : '成员2')
         r.fillRoundRect(x + 2, y + 2, 32, 12, THEME.radius.sm - 2, COLORS.gold)
-        r.fillText(slotLabel, x + 18, y + 10, COLORS.bgPanel, 7, 'bold')
+        r.fillText(slotLabel, x + 18, y + 10, COLORS.bgPanel, THEME.font.tiny.size, 'bold')
       }
 
       // 怪物emoji
-      r.fillText(monster.emoji, x + this.listItemW / 2, y + 28, COLORS.textPrimary, 22)
+      r.fillText(monster.emoji, x + this.listItemW / 2, y + 28, COLORS.textPrimary, THEME.font.icon.size)
 
       // 名字
-      r.fillText(monster.name, x + this.listItemW / 2, y + 52, COLORS.textPrimary, 9, 'bold')
+      r.fillText(monster.name, x + this.listItemW / 2, y + 52, COLORS.textPrimary, THEME.font.tiny.size, 'bold')
 
       // 等级+性格（显示在名字下方）
       const realLevel = this.game.storage.getMonsterLevel(monsterId) || 1
       const natureId = this.game.storage.getMonsterNature(monsterId)
       const nature = natureId ? getNature(natureId) : null
-      r.fillText(`Lv.${realLevel}`, x + this.listItemW / 2 - 14, y + 64, COLORS.textMuted, 7)
+      r.fillText(`Lv.${realLevel}`, x + this.listItemW / 2 - 14, y + 64, COLORS.textMuted, THEME.font.tiny.size)
       if (nature) {
-        r.fillText(`${nature.emoji}${nature.name}`, x + this.listItemW / 2 + 14, y + 64, COLORS.gold, 7)
+        r.fillText(`${nature.emoji}${nature.name}`, x + this.listItemW / 2 + 14, y + 64, COLORS.gold, THEME.font.tiny.size)
       }
 
       // 属性
-      r.fillText(this._getElementName(monster.element), x + this.listItemW / 2, y + 76, THEME.colors.elementColors[monster.element] || COLORS.textMuted, 9)
+      r.fillText(this._getElementName(monster.element), x + this.listItemW / 2, y + 76, THEME.colors.elementColors[monster.element] || COLORS.textMuted, THEME.font.tiny.size)
 
       // 稀有度
       const stars = '★'.repeat(monster.rarity)
-      r.fillText(stars, x + this.listItemW / 2, y + 88, COLORS.gold, 7)
+      r.fillText(stars, x + this.listItemW / 2, y + 88, COLORS.gold, THEME.font.tiny.size)
 
       // 队长技能标记（★3+有队长技能）
       if (monster.leaderSkill) {
         const skill = getLeaderSkill(monster.leaderSkill)
         if (skill) {
-          r.fillText(skill.icon, x + this.listItemW - 12, y + 10, COLORS.gold, 9)
+          r.fillText(skill.icon, x + this.listItemW - 12, y + 10, COLORS.gold, THEME.font.tiny.size)
         }
       }
 
       // 在队伍中标记
       if (inTeam) {
-        r.fillText('☑️', x + this.listItemW - 15, y + 12, COLORS.success, 10)
+        r.fillText('☑️', x + this.listItemW - 15, y + 12, COLORS.success, THEME.font.tiny.size)
       }
     }
 
@@ -671,8 +670,7 @@ export class SceneTeamSetup {
     this.saveBtn.w = 140
     this.saveBtn.h = 45
 
-    r.fillRoundRect(this.saveBtn.x, this.saveBtn.y, this.saveBtn.w, this.saveBtn.h, THEME.radius.md, THEME.buttons.secondary.bgColor)
-    r.fillText('💾 保存', this.saveBtn.x + 70, btnY + 28, COLORS.textPrimary, 14, 'bold')
+    r.drawButton({ x: this.saveBtn.x, y: this.saveBtn.y, w: this.saveBtn.w, h: this.saveBtn.h, text: '💾 保存' }, 'primary')
 
     // 取消按钮
     this.cancelBtn.x = 20
@@ -680,8 +678,7 @@ export class SceneTeamSetup {
     this.cancelBtn.w = 100
     this.cancelBtn.h = 45
 
-    r.fillRoundRect(this.cancelBtn.x, this.cancelBtn.y, this.cancelBtn.w, this.cancelBtn.h, THEME.radius.md, COLORS.disabledBg)
-    r.fillText('取消', this.cancelBtn.x + 50, btnY + 28, COLORS.textSecondary, 14)
+    r.drawButton({ x: this.cancelBtn.x, y: this.cancelBtn.y, w: this.cancelBtn.w, h: this.cancelBtn.h, text: '取消' }, 'danger')
   }
 
   _renderConfirmDialog(r) {
@@ -698,21 +695,19 @@ export class SceneTeamSetup {
     r.strokeRect(dialogX, dialogY, dialogW, dialogH, 2, COLORS.gold)
 
     // 标题
-    r.fillText('⚠️ 确认取消', this.designW / 2, dialogY + 35, COLORS.gold, 14, 'bold')
+    r.fillText('⚠️ 确认取消', this.designW / 2, dialogY + 35, COLORS.gold, THEME.font.body.size, 'bold')
 
     // 提示文字
-    r.fillText('放弃当前编辑？', this.designW / 2, dialogY + 60, COLORS.textSecondary, 12)
-    r.fillText('（未保存的更改将丢失）', this.designW / 2, dialogY + 80, COLORS.textMuted, 10)
+    r.fillText('放弃当前编辑？', this.designW / 2, dialogY + 60, COLORS.textSecondary, THEME.font.small.size)
+    r.fillText('（未保存的更改将丢失）', this.designW / 2, dialogY + 80, COLORS.textMuted, THEME.font.tiny.size)
 
     // 确认取消按钮
     const confirmBtn = { x: dialogX + 20, y: dialogY + 100, w: 100, h: 40 }
-    r.fillRoundRect(confirmBtn.x, confirmBtn.y, confirmBtn.w, confirmBtn.h, THEME.radius.sm, THEME.buttons.danger.bgColor)
-    r.fillText('确认取消', confirmBtn.x + 50, dialogY + 126, COLORS.textPrimary, 12, 'bold')
+    r.drawButton({ x: confirmBtn.x, y: confirmBtn.y, w: confirmBtn.w, h: confirmBtn.h, text: '确认取消' }, 'danger')
 
     // 继续编辑按钮
     const continueBtn = { x: dialogX + 160, y: dialogY + 100, w: 100, h: 40 }
-    r.fillRoundRect(continueBtn.x, continueBtn.y, continueBtn.w, continueBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('继续编辑', continueBtn.x + 50, dialogY + 126, COLORS.textPrimary, 12, 'bold')
+    r.drawButton({ x: continueBtn.x, y: continueBtn.y, w: continueBtn.w, h: continueBtn.h, text: '继续编辑' }, 'secondary')
   }
 
   _getElementColor(element) {

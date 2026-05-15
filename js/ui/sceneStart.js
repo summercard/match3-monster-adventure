@@ -3,6 +3,25 @@
 // ============================================
 import { THEME, COLORS, FONT } from '../engine/theme.js'
 
+const START_ASSETS = {
+  bg: 'assets/images/start/start_bg_grassland.png',
+  logo: 'assets/images/start/start_title_logo.png',
+  fireMonster: 'assets/images/start/monster_fire_lizard.png',
+  waterMonster: 'assets/images/start/monster_water_cub.png',
+  grassMonster: 'assets/images/start/monster_grass_leaf.png',
+  gemFire: 'assets/images/start/gem_fire.png',
+  gemWater: 'assets/images/start/gem_water.png',
+  gemGrass: 'assets/images/start/gem_grass.png',
+  gemThunder: 'assets/images/start/gem_thunder.png',
+  gemLight: 'assets/images/start/gem_light.png',
+  startButton: 'assets/images/start/ui_btn_start.png',
+  startButtonNormal: 'assets/images/start/ui_btn_start_normal.png',
+  startButtonPressed: 'assets/images/start/ui_btn_start_pressed.png',
+  startButtonDisabled: 'assets/images/start/ui_btn_start_disabled.png',
+  hintRibbon: 'assets/images/start/ui_hint_ribbon.png',
+  versionPlaque: 'assets/images/start/ui_version_plaque.png',
+}
+
 export class SceneStart {
   constructor(game, data) {
     this.game = game
@@ -21,6 +40,10 @@ export class SceneStart {
     // Canvas 缓存（静态区域预渲染）
     this._bgCache = null      // 离屏 Canvas：标题+装饰+版本号
     this._bgCacheValid = false // 缓存是否需要刷新
+
+    // 美术资源：启动页专用拆分资产
+    this.artAssets = {}
+    this.artReady = false
   }
 
   init(data) {
@@ -29,7 +52,48 @@ export class SceneStart {
     this.game.input.onTouchStart = this.touchStartCallback
     this.game.input.onTouchEnd = this.touchEndCallback
     this.game.input.onLongPress = this.longPressCallback
+    this._loadArtAssets()
     this._initParticles()
+  }
+
+  _loadArtAssets() {
+    if (this._artLoadingStarted) return
+    this._artLoadingStarted = true
+
+    const entries = Object.entries(START_ASSETS)
+    let loadedCount = 0
+    this.artAssets = {}
+
+    entries.forEach(([key, src]) => {
+      const img = wx.createImage()
+      const item = { img, loaded: false, src }
+      this.artAssets[key] = item
+      img.onload = () => {
+        item.loaded = true
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+        this._bgCacheValid = false
+      }
+      img.onerror = () => {
+        console.warn(`[SceneStart] 美术资源加载失败: ${src}`)
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.src = src
+    })
+  }
+
+  _getEnterButtonRect(scale = 1) {
+    const w = this.game.renderer.designWidth
+    const h = this.game.renderer.designHeight
+    const btnW = 280 * scale
+    const btnH = 72 * scale
+    return {
+      x: (w - btnW) / 2,
+      y: h * 0.78 + (72 - btnH) / 2,
+      w: btnW,
+      h: btnH
+    }
   }
 
   // ============================================
@@ -55,13 +119,9 @@ export class SceneStart {
   }
 
   _onTouchStart(x, y) {
-    const w = this.game.renderer.designWidth
-    const h = this.game.renderer.designHeight
-    const btnW = 280, btnH = 72
-    const btnX = (w - btnW) / 2
-    const btnY = h * 0.68
+    const btn = this._getEnterButtonRect()
 
-    if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       this.touchedBtn = 'enterBtn'
     } else {
       this.touchedBtn = null
@@ -74,13 +134,9 @@ export class SceneStart {
   }
 
   _onLongPress(x, y) {
-    const w = this.game.renderer.designWidth
-    const h = this.game.renderer.designHeight
-    const btnW = 280, btnH = 72
-    const btnX = (w - btnW) / 2
-    const btnY = h * 0.68
+    const btn = this._getEnterButtonRect()
 
-    if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       // 长按"进入游戏"按钮 → 增强光晕效果
       this.longPressGlow = 1
     }
@@ -89,13 +145,9 @@ export class SceneStart {
   _onTap(x, y) {
     if (!this.ready) return
 
-    const w = this.game.renderer.designWidth
-    const h = this.game.renderer.designHeight
-    const btnW = 280, btnH = 72
-    const btnX = (w - btnW) / 2
-    const btnY = h * 0.68
+    const btn = this._getEnterButtonRect()
 
-    if (x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH) {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       // 检测新手引导状态
       const progress = this.game.storage.loadTutorialProgress()
       if (progress.completed) {
@@ -270,8 +322,14 @@ export class SceneStart {
 
     r.ctx.restore()
 
-    // 绘制主按钮背景
-    r.fillRoundRect(btn.x, btn.y, btn.w, btn.h, 16, THEME.buttons.primary.bgColor)
+    // 绘制主按钮背景：优先使用拆分出的按钮资产
+    const stateAsset = pressed ? this.artAssets.startButtonPressed : this.artAssets.startButtonNormal
+    const btnAsset = stateAsset?.loaded ? stateAsset : this.artAssets.startButton
+    if (btnAsset && btnAsset.loaded) {
+      this._drawImageFit(r, btnAsset.img, btn.x, btn.y, btn.w, btn.h, pressed ? 0.86 : 1)
+    } else {
+      r.fillRoundRect(btn.x, btn.y, btn.w, btn.h, 16, THEME.buttons.primary.bgColor)
+    }
 
     // 按压时叠加半透明暗色层
     if (pressed) {
@@ -286,7 +344,12 @@ export class SceneStart {
     r.ctx.textAlign = 'center'
     r.ctx.textBaseline = 'middle'
     // 文字阴影改用简化的 offset shadow（避免 shadowBlur）
-    r.ctx.fillText(btn.text, btn.x + btn.w / 2 + 1, btn.y + btn.h / 2 + 1)
+    r.ctx.globalAlpha = 0.45
+    r.ctx.fillStyle = THEME.colors.bgDark
+    r.ctx.fillText(btn.text, sx + sw / 2 + 1 * r.scaleX, sy + sh / 2 + 2 * r.scaleY)
+    r.ctx.globalAlpha = 1
+    r.ctx.fillStyle = COLORS.white
+    r.ctx.fillText(btn.text, sx + sw / 2, sy + sh / 2)
     r.ctx.restore()
   }
 
@@ -330,6 +393,11 @@ export class SceneStart {
     const w = r.designWidth
     const h = r.designHeight
     const a = this.opacity
+
+    if (this.artAssets.bg && this.artAssets.bg.loaded) {
+      this._renderArtStartScreen(r, w, h, a)
+      return
+    }
 
     // ================================================
     // 静态区域 Canvas 缓存（标题+装饰+版本号）
@@ -428,10 +496,7 @@ export class SceneStart {
       const isPressed = this.touchedBtn === 'enterBtn'
       const pressScale = isPressed ? 0.95 : 1
       const enterBtn = {
-        x: (w - 280 * pressScale) / 2,
-        y: h * 0.68 + (72 - 72 * pressScale) / 2,
-        w: 280 * pressScale,
-        h: 72 * pressScale,
+        ...this._getEnterButtonRect(pressScale),
         text: '进 入 游 戏'
       }
       const glowIntensity = this.pulse + this.longPressGlow * 0.5
@@ -441,6 +506,129 @@ export class SceneStart {
       const hintAlpha = Math.round((0.4 + this.pulse * 0.3) * 255).toString(16).padStart(2, '0')
       r.fillText('点击开始你的冒险之旅', w / 2, h * 0.82, COLORS.textSecondary + hintAlpha, FONT.small.size)
     }
+  }
+
+  _renderArtStartScreen(r, w, h, a) {
+    r.ctx.save()
+    r.ctx.globalAlpha = a
+    this._drawImageCover(r, this.artAssets.bg.img, 0, 0, w, h)
+    r.ctx.restore()
+
+    this._drawParticles(r)
+
+    const logo = this.artAssets.logo
+    if (logo && logo.loaded) {
+      this._drawImageFit(r, logo.img, 20, 20, 335, 178, a)
+    } else {
+      this._drawTextWithStroke(r, '萌灵消消大冒险', w / 2, h * 0.15, COLORS.gold, '#0b102a', 28, 4, a)
+    }
+
+    // 初始三怪物：按前后景错落，形成启动页中心视觉。
+    this._drawStartMonster(r, 'fireMonster', 38, 270, 140, a, -2)
+    this._drawStartMonster(r, 'waterMonster', 118, 252, 144, a, 0)
+    this._drawStartMonster(r, 'grassMonster', 205, 274, 138, a, 2)
+
+    // 五元素宝石环绕，使用正式拆分后的透明宝石资产。
+    const gemY = 424
+    this._drawStartGem(r, 'gemFire', 112, gemY, 48, a)
+    this._drawStartGem(r, 'gemWater', 164, gemY - 16, 52, a)
+    this._drawStartGem(r, 'gemGrass', 218, gemY, 48, a)
+    this._drawStartGem(r, 'gemThunder', 140, gemY + 42, 46, a)
+    this._drawStartGem(r, 'gemLight', 194, gemY + 42, 46, a)
+
+    if (this.ready) {
+      const isPressed = this.touchedBtn === 'enterBtn'
+      const pressScale = isPressed ? 0.95 : 1
+      const enterBtn = {
+        ...this._getEnterButtonRect(pressScale),
+        text: '开 始 冒 险'
+      }
+      const glowIntensity = this.pulse + this.longPressGlow * 0.5
+      this._drawGlowButton(r, enterBtn, glowIntensity, isPressed)
+
+      this._drawStartHint(r, w, h, a)
+    }
+
+    this._drawStartVersion(r, w, h, a)
+  }
+
+  _drawStartHint(r, w, h, opacity) {
+    const hintAlpha = 0.58 + this.pulse * 0.25
+    const ribbon = this.artAssets.hintRibbon
+    const x = 55
+    const y = h * 0.887
+    const rw = 265
+    const rh = 42
+
+    r.ctx.save()
+    r.ctx.globalAlpha = opacity * hintAlpha
+    if (ribbon && ribbon.loaded) {
+      this._drawImageFit(r, ribbon.img, x, y, rw, rh, 0.86)
+    } else {
+      r.fillRoundRect(x, y + 4, rw, 30, 14, THEME.colors.bgPanel)
+    }
+    r.fillText('点击开始你的冒险之旅', w / 2 + 10, y + rh / 2 + 1, COLORS.white, FONT.small.size)
+    r.ctx.restore()
+  }
+
+  _drawStartVersion(r, w, h, opacity) {
+    const plaque = this.artAssets.versionPlaque
+    const pw = 82
+    const ph = 30
+    const x = (w - pw) / 2
+    const y = h * 0.952
+
+    r.ctx.save()
+    r.ctx.globalAlpha = opacity * 0.72
+    if (plaque && plaque.loaded) {
+      this._drawImageFit(r, plaque.img, x, y, pw, ph, 0.78)
+    }
+    r.fillText('v0.1.0', w / 2, y + ph / 2, COLORS.white, FONT.tiny.size)
+    r.ctx.restore()
+  }
+
+  _drawStartMonster(r, key, x, y, size, opacity, bobOffset) {
+    const asset = this.artAssets[key]
+    if (!asset || !asset.loaded) return
+    const bob = Math.sin(this.pulse * Math.PI * 2 + bobOffset) * 4
+    this._drawImageFit(r, asset.img, x, y + bob, size, size, opacity)
+  }
+
+  _drawStartGem(r, key, x, y, size, opacity) {
+    const asset = this.artAssets[key]
+    if (!asset || !asset.loaded) return
+    const glow = 1 + this.pulse * 0.08
+    const drawSize = size * glow
+    this._drawImageFit(r, asset.img, x - drawSize / 2, y - drawSize / 2, drawSize, drawSize, opacity)
+  }
+
+  _drawImageFit(r, img, x, y, w, h, opacity = 1) {
+    const sx = x * r.scaleX
+    const sy = y * r.scaleY
+    const sw = w * r.scaleX
+    const sh = h * r.scaleY
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(img, sx, sy, sw, sh)
+    r.ctx.restore()
+  }
+
+  _drawImageCover(r, img, x, y, w, h) {
+    const srcRatio = img.width / img.height
+    const dstRatio = w / h
+    let sx = 0, sy = 0, sw = img.width, sh = img.height
+    if (srcRatio > dstRatio) {
+      sw = img.height * dstRatio
+      sx = (img.width - sw) / 2
+    } else {
+      sh = img.width / dstRatio
+      sy = (img.height - sh) / 2
+    }
+    r.ctx.drawImage(
+      img,
+      sx, sy, sw, sh,
+      x * r.scaleX, y * r.scaleY, w * r.scaleX, h * r.scaleY
+    )
   }
 
   // ================================================

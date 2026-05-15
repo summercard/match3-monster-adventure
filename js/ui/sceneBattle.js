@@ -9,6 +9,34 @@ import { FloatingTextManager } from '../engine/FloatingTextManager.js'
 import { THEME, COLORS } from '../engine/theme.js'
 import { chapters as STAGE_CHAPTERS } from '../../data/stages.js'
 
+const BATTLE_ASSETS = {
+  bg: 'assets/images/battle/battle_bg_forest_ruins.png',
+  gemFire: 'assets/images/battle/gems/gem_fire.png',
+  gemWater: 'assets/images/battle/gems/gem_water.png',
+  gemGrass: 'assets/images/battle/gems/gem_grass.png',
+  gemThunder: 'assets/images/battle/gems/gem_thunder.png',
+  gemLight: 'assets/images/battle/gems/gem_light.png',
+  gemLocked: 'assets/images/battle/gems/gem_locked_tile.png',
+  gemRainbow: 'assets/images/battle/gems/gem_rainbow_special.png',
+  obstacleRockFull: 'assets/images/battle/gems/obstacle_rock_full.png',
+  obstacleRockCracked: 'assets/images/battle/gems/obstacle_rock_cracked.png',
+  monsterFire: 'assets/images/battle/monsters/monster_001_fire_lizard.png',
+  monsterWater: 'assets/images/battle/monsters/monster_002_water_cub.png',
+  monsterGrass: 'assets/images/battle/monsters/monster_003_grass_leaf.png',
+  bossGrass: 'assets/images/battle/monsters/monster_boss_001_grass_flower_512.png',
+  panelDark: 'assets/images/battle/ui/ui_panel_dark_large.png',
+}
+
+const GEM_ASSET_KEYS = {
+  fire: 'gemFire',
+  water: 'gemWater',
+  grass: 'gemGrass',
+  thunder: 'gemThunder',
+  light: 'gemLight',
+  [ENHANCED_GEM]: 'gemRainbow',
+  [BOMB_GEM]: 'gemRainbow',
+}
+
 // 关卡数据（用于从 stageId 查找完整关卡信息）
 function _getStagesData() {
   return { chapters: STAGE_CHAPTERS || [] }
@@ -74,6 +102,11 @@ export class SceneBattle {
 
     // 锁定宝石解锁动画队列
     this.unlockAnimations = [] // [{ row, col, timer, phase, x, y }]
+
+    // 战斗美术资源
+    this.artAssets = {}
+    this.artReady = false
+    this._artLoadingStarted = false
   }
 
   init(data = {}) {
@@ -191,6 +224,7 @@ export class SceneBattle {
     // 设置输入回调
     this.game.input.onSwipe = this._onSwipe.bind(this)
     this.game.input.onTap = this._onTap.bind(this)
+    this._loadBattleArtAssets()
 
     // 阶段切换相关
     this.phaseTransitionState = null  // { phase, enemies, timer }
@@ -204,6 +238,32 @@ export class SceneBattle {
 
     this.state = 'idle'
     this._showMessage(this.stageData ? `${this.stageData.name} 开始！` : '战斗开始！')
+  }
+
+  _loadBattleArtAssets() {
+    if (this._artLoadingStarted) return
+    this._artLoadingStarted = true
+
+    const entries = Object.entries(BATTLE_ASSETS)
+    let loadedCount = 0
+    this.artAssets = {}
+
+    entries.forEach(([key, src]) => {
+      const img = wx.createImage()
+      const item = { img, loaded: false, src }
+      this.artAssets[key] = item
+      img.onload = () => {
+        item.loaded = true
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.onerror = () => {
+        console.warn(`[SceneBattle] 美术资源加载失败: ${src}`)
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.src = src
+    })
   }
 
   _onPhaseTransition(newPhase, newEnemies) {
@@ -1297,8 +1357,14 @@ export class SceneBattle {
       r.translate(this.attackShakeOffsetX, 0)
     }
 
-    // 背景
-    r.fillRect(0, 0, this.designW, this.designH, THEME.colors.bgMedium)
+    // 背景：优先使用战斗场景美术底图
+    const bgAsset = this.artAssets.bg
+    if (bgAsset && bgAsset.loaded) {
+      this._drawImageCover(r, bgAsset.img, 0, 0, this.designW, this.designH)
+      r.fillRect(0, 0, this.designW, this.designH, 'rgba(5,8,22,0.18)')
+    } else {
+      r.fillRect(0, 0, this.designW, this.designH, THEME.colors.bgMedium)
+    }
 
     // 攻击白闪效果（画布叠加层，在震动范围内）
     if (this.attackFlashTimer > 0) {
@@ -1350,7 +1416,7 @@ export class SceneBattle {
     const by = this.board.offsetY - 5
     const bw = this.board.cols * this.board.cellSize + 10
     const bh = this.board.rows * this.board.cellSize + 10
-    r.fillRoundRect(bx, by, bw, bh, THEME.radius.md, COLORS.battle.boardBg)
+    r.fillRoundRect(bx, by, bw, bh, THEME.radius.md, 'rgba(15,52,96,0.88)')
 
     // 绘制棋盘格子
     this._renderBoard(r)
@@ -1379,13 +1445,13 @@ export class SceneBattle {
       r.fillRoundRect(cx - boxW / 2, cy - boxH / 2, boxW, boxH, 12 * scale, `rgba(0,0,0,${0.7 * opacity})`)
 
       // 文字（带透明度和缩放）
-      r.fillText(`${c.combo}连击！`, cx, cy, `rgba(255,215,0,${opacity})`, Math.round(28 * scale), 'center', 'bold')
+      r.fillText(`${c.combo}连击！`, cx, cy, `rgba(255,215,0,${opacity})`, Math.round(THEME.font.title.size * scale), 'center', 'bold')
     }
 
     // 倒下提示
     this.fallMessages.forEach((fm, i) => {
       const alpha = Math.min(1, fm.timer)
-      r.fillText(fm.text, this.designW / 2, 300 + i * 25, `rgba(255,100,100,${alpha})`, 14)
+      r.fillText(fm.text, this.designW / 2, 300 + i * 25, `rgba(255,100,100,${alpha})`, THEME.font.body.size)
     })
 
     // 底部信息栏（根据回合状态变色）
@@ -1408,8 +1474,8 @@ export class SceneBattle {
     if (this.state === 'battleEnd') {
       r.fillRect(0, 0, this.designW, this.designH, 'rgba(0,0,0,0.6)')
       const resultText = this.battle.battleResult === 'win' ? '🎉 胜利！' : '💀 失败...'
-      r.fillText(resultText, this.designW / 2, this.designH / 2 - 30, COLORS.white, 28)
-      r.fillText('点击查看结算', this.designW / 2, this.designH / 2 + 20, COLORS.textMuted, 14)
+      r.fillText(resultText, this.designW / 2, this.designH / 2 - 30, COLORS.white, THEME.font.title.size)
+      r.fillText('点击查看结算', this.designW / 2, this.designH / 2 + 20, COLORS.textMuted, THEME.font.body.size)
 
       // 点击任意位置进入结算
       if (!this.waitingForResult) {
@@ -1471,6 +1537,16 @@ export class SceneBattle {
       if (!enemy) return
       const x = startX + i * 120
       const y = startY + 25
+      const cardH = 92
+      const cardColor = enemy.isBoss ? 'rgba(61,26,26,0.76)' : 'rgba(22,33,62,0.72)'
+      if (this.artAssets.panelDark && this.artAssets.panelDark.loaded) {
+        this._drawImageFit(r, this.artAssets.panelDark.img, x + 5, y - 5, 110, cardH, 0.82)
+      } else {
+        r.fillRoundRect(x + 5, y - 5, 110, cardH, THEME.radius.md, cardColor)
+      }
+      if (enemy.isBoss) {
+        r.fillRoundRect(x + 5, y - 5, 110, cardH, THEME.radius.md, 'rgba(90,25,25,0.22)')
+      }
 
       // 检查是否有受击闪烁
       const flash = this.hitFlashes.find(f => f.isEnemy && f.monsterIndex === i)
@@ -1482,19 +1558,27 @@ export class SceneBattle {
       // 受击红闪覆盖层
       if (flash) {
         const flashAlpha = flash.timer / flash.maxTimer * 0.6
-        r.fillRoundRect(x + 5, y - 5, 100, 50, THEME.radius.md, `rgba(255,50,50,${flashAlpha})`)
+        r.fillRoundRect(x + 5, y - 5, 110, cardH, THEME.radius.md, `rgba(255,50,50,${flashAlpha})`)
+      }
+
+      const monsterKey = this._getMonsterAssetKey(enemy)
+      if (monsterKey && this.artAssets[monsterKey]?.loaded) {
+        const spriteSize = enemy.isBoss ? 70 : 54
+        this._drawImageFit(r, this.artAssets[monsterKey]?.img, x + 55 - spriteSize / 2, y - 2 + idleYOffset, spriteSize, spriteSize, enemy.hp > 0 ? 1 : 0.35)
+      } else if (enemy.emoji) {
+        r.fillText(enemy.emoji, x + 55, y + 25 + idleYOffset, COLORS.white, THEME.font.display.size)
       }
 
       // 名称（不含emoji，单独绘制以便加上浮动特效）
       const nameColor = enemy.hp > 0 ? (flash ? THEME.colors.danger : COLORS.white) : COLORS.textMuted
-      r.fillText(enemy.name, x + 55, y + 8 + idleYOffset, nameColor, THEME.font.small.size)
+      r.fillText(enemy.name, x + 55, y + 55, nameColor, THEME.font.small.size)
 
       // 血条（闪烁时红色，动画HP值）
       const hpBarColor = flash ? COLORS.battle.flashHpBar : THEME.colors.danger
-      r.drawHPBar(x + 10, y + 18, 95, 8, displayHP, enemy.maxHP, COLORS.battle.hpBarBg, hpBarColor)
+      r.drawHPBar(x + 12, y + 66, 96, 8, displayHP, enemy.maxHP, COLORS.battle.hpBarBg, hpBarColor)
 
       // HP数值（动画HP值）
-      r.fillText(`${Math.max(0, Math.round(displayHP))}/${enemy.maxHP}`, x + 55, y + 35, COLORS.battle.enemyHpText, 9)
+      r.fillText(`${Math.max(0, Math.round(displayHP))}/${enemy.maxHP}`, x + 60, y + 82, COLORS.battle.enemyHpText, 9)
 
       // ===== Boss技能视觉反馈 =====
       const skillVis = this.bossSkillVisuals[i]
@@ -1509,18 +1593,18 @@ export class SceneBattle {
           ctx.strokeStyle = shieldColor
           ctx.lineWidth = 2
           ctx.beginPath()
-          ctx.arc(x + 55, y + 15, 42, 0, Math.PI * 2)
+          ctx.arc(x + 55, y + 28, 36, 0, Math.PI * 2)
           ctx.stroke()
           ctx.restore()
           // 护盾HP条（在血条下方）
-          r.drawHPBar(x + 10, y + 27, 95, 4, skillVis.shieldHP, skillVis.shieldMaxHP, COLORS.battle.hpBarBg, COLORS.shield)
-          r.fillText(`🛡️${Math.round(skillVis.shieldHP)}`, x + 55, y + 33, COLORS.shield, 8)
+          r.drawHPBar(x + 12, y + 75, 96, 4, skillVis.shieldHP, skillVis.shieldMaxHP, COLORS.battle.hpBarBg, COLORS.shield)
+          r.fillText(`🛡️${Math.round(skillVis.shieldHP)}`, x + 55, y + 81, COLORS.shield, 8)
         }
 
         // 蓄力中闪烁文字
         if (skillVis.chargeTimer > 0) {
           const blinkAlpha = 0.5 + 0.5 * Math.sin(this.idleTime * Math.PI * 4)
-          r.fillText('⚡蓄力中...', x + 55, y - 5, `rgba(255,200,50,${blinkAlpha})`, 10)
+          r.fillText('⚡蓄力中...', x + 55, y - 2, `rgba(255,200,50,${blinkAlpha})`, 10)
         }
       }
 
@@ -1536,7 +1620,7 @@ export class SceneBattle {
 
           // 状态图标（敌人名称上方）
           const blinkAlpha = 0.7 + 0.3 * Math.sin(this.idleTime * Math.PI * 3)
-          r.fillText(`${emoji}${effect.turnsLeft}`, x + 55, y - 3, `rgba(${this._hexToRgb(color)},${blinkAlpha})`, 10)
+          r.fillText(`${emoji}${effect.turnsLeft}`, x + 95, y + 10, `rgba(${this._hexToRgb(color)},${blinkAlpha})`, 10)
         }
       }
     })
@@ -1553,6 +1637,11 @@ export class SceneBattle {
       if (!member) return
       const x = startX + i * 120
       const y = startY + 25
+      if (this.artAssets.panelDark && this.artAssets.panelDark.loaded) {
+        this._drawImageFit(r, this.artAssets.panelDark.img, x + 5, y - 8, 110, 58, 0.78)
+      } else {
+        r.fillRoundRect(x + 5, y - 8, 110, 58, THEME.radius.md, 'rgba(22,33,62,0.76)')
+      }
 
       // 检查是否有受击闪烁
       const flash = this.hitFlashes.find(f => !f.isEnemy && f.monsterIndex === i)
@@ -1564,23 +1653,30 @@ export class SceneBattle {
       // 受击时高亮覆盖层
       if (flash) {
         const flashAlpha = flash.timer / flash.maxTimer * 0.6
-        r.fillRoundRect(x + 5, y - 5, 100, 50, THEME.radius.md, `rgba(255,255,50,${flashAlpha})`)
+        r.fillRoundRect(x + 5, y - 8, 110, 58, THEME.radius.md, `rgba(255,255,50,${flashAlpha})`)
+      }
+
+      const monsterKey = this._getMonsterAssetKey(member)
+      if (monsterKey && this.artAssets[monsterKey]?.loaded) {
+        this._drawImageFit(r, this.artAssets[monsterKey]?.img, x + 8, y - 5 + idleYOffset * 0.4, 42, 42, member.hp > 0 ? 1 : 0.35)
+      } else if (member.emoji) {
+        r.fillText(member.emoji, x + 30, y + 16 + idleYOffset * 0.4, COLORS.white, THEME.font.icon.size)
       }
 
       const nameColor = member.hp > 0 ? (flash ? THEME.colors.danger : COLORS.white) : COLORS.textMuted
       // 名称（不含emoji，单独绘制以便加上浮动特效）
-      r.fillText(member.name, x + 55, y + 8 + idleYOffset, nameColor, THEME.font.small.size)
+      r.fillText(member.name, x + 78, y + 6, nameColor, THEME.font.small.size)
 
       // 血条（闪烁时高亮，动画HP值）
       const hpBarColor = flash ? COLORS.battle.flashHitBar : THEME.colors.success
-      r.drawHPBar(x + 10, y + 18, 95, 8, displayHP, member.maxHP, COLORS.battle.hpBarBg, hpBarColor)
+      r.drawHPBar(x + 52, y + 16, 58, 7, displayHP, member.maxHP, COLORS.battle.hpBarBg, hpBarColor)
 
-      r.fillText(`${Math.max(0, Math.round(displayHP))}/${member.maxHP}`, x + 55, y + 35, COLORS.battle.playerHpText, 9)
+      r.fillText(`${Math.max(0, Math.round(displayHP))}/${member.maxHP}`, x + 82, y + 31, COLORS.battle.playerHpText, 8)
 
       // 技能充能
       const charge = this.battle.skillCharges[member.id] || 0
       const ratio = Math.min(1, charge / member.skill.cost)
-      r.drawHPBar(x + 10, y + 38, 95, 5, ratio * member.skill.cost, member.skill.cost, COLORS.battle.skillChargeBg, THEME.colors.gold)
+      r.drawHPBar(x + 52, y + 38, 58, 5, ratio * member.skill.cost, member.skill.cost, COLORS.battle.skillChargeBg, THEME.colors.gold)
     })
   }
 
@@ -1627,16 +1723,18 @@ export class SceneBattle {
 
         const x = b.offsetX + col * b.cellSize + b.cellSize / 2
         const y = b.offsetY + row * b.cellSize + b.cellSize / 2
-        const radius = b.cellSize * 0.38
+        const cellX = b.offsetX + col * b.cellSize
+        const cellY = b.offsetY + row * b.cellSize
 
-        // 宝石背景圆形（带脉动透明度）
-        r.fillCircle(x, y, radius, GEM_COLORS[type], pulseOpacity)
+        // 棋盘格底
+        r.fillRoundRect(cellX + 1, cellY + 1, b.cellSize - 2, b.cellSize - 2, 4, 'rgba(5,18,42,0.66)')
 
-        // 宝石内圆（高光效果，带透明度）
-        r.fillCircle(x - 2, y - 2, radius * 0.5, `rgba(255,255,255,${0.3 * pulseOpacity})`)
-
-        // 宝石emoji（带透明度）
-        r.fillText(GEM_EMOJI[type], x, y, `rgba(255,255,255,${pulseOpacity})`, 14)
+        if (!this._drawGemAsset(r, type, x, y, b.cellSize * 0.86, pulseOpacity)) {
+          const radius = b.cellSize * 0.38
+          r.fillCircle(x, y, radius, GEM_COLORS[type], pulseOpacity)
+          r.fillCircle(x - 2, y - 2, radius * 0.5, `rgba(255,255,255,${0.3 * pulseOpacity})`)
+          r.fillText(GEM_EMOJI[type], x, y, `rgba(255,255,255,${pulseOpacity})`, THEME.font.body.size)
+        }
       }
     }
 
@@ -1670,15 +1768,12 @@ export class SceneBattle {
         r.fillCircle(x, y, radius * 1.2, flashColor)
       }
 
-      // 宝石背景圆形（带透明度）
-      const baseColor = GEM_COLORS[gem.type] || COLORS.white
-      r.fillCircle(x, y, radius, baseColor, opacity)
-
-      // 宝石内圆（高光效果）
-      r.fillCircle(x - 2 * scale, y - 2 * scale, radius * 0.5, `rgba(255,255,255,${0.3 * opacity})`)
-
-      // 宝石emoji（带透明度）
-      r.fillText(GEM_EMOJI[gem.type], x, y, `rgba(255,255,255,${opacity})`, 14 * scale)
+      if (!this._drawGemAsset(r, gem.type, x, y, b.cellSize * 0.86 * scale, opacity)) {
+        const baseColor = GEM_COLORS[gem.type] || COLORS.white
+        r.fillCircle(x, y, radius, baseColor, opacity)
+        r.fillCircle(x - 2 * scale, y - 2 * scale, radius * 0.5, `rgba(255,255,255,${0.3 * opacity})`)
+        r.fillText(GEM_EMOJI[gem.type], x, y, `rgba(255,255,255,${opacity})`, THEME.font.body.size * scale)
+      }
     })
 
     // 渲染4连强化宝石的发光效果
@@ -1702,6 +1797,15 @@ export class SceneBattle {
         const animating = this.unlockAnimations.find(a => a.row === row && a.col === col && a.phase === 'shatter')
 
         if (!animating) {
+          const lockAsset = this.artAssets.gemLocked
+          if (lockAsset && lockAsset.loaded) {
+            this._drawImageFit(r, lockAsset.img, x + 3, y + 3, size - 6, size - 6, lock.hp >= 2 ? 0.92 : 0.72)
+            if (lock.hp < 2) {
+              r.fillText('×1', cx, cy + size * 0.3, 'rgba(255,255,255,0.8)', 8)
+            }
+            continue
+          }
+
           // 锁链边框：灰色半透明边框环绕宝石
           const ctx = r.ctx
           ctx.save()
@@ -1791,6 +1895,12 @@ export class SceneBattle {
         const cy = y + size / 2
 
         if (ob.type === 'rock') {
+          const rockAsset = ob.hp >= 2 ? this.artAssets.obstacleRockFull : this.artAssets.obstacleRockCracked
+          if (rockAsset && rockAsset.loaded) {
+            this._drawImageFit(r, rockAsset.img, x + 3, y + 3, size - 6, size - 6, 0.98)
+            continue
+          }
+
           // 石块底色
           r.fillRoundRect(x + 2, y + 2, size - 4, size - 4, 4, COLORS.obstacle.rock)
 
@@ -1801,7 +1911,7 @@ export class SceneBattle {
             // 高光
             r.fillRoundRect(x + 6, y + 6, size - 16, (size - 8) / 3, 2, 'rgba(255,255,255,0.15)')
             // 石块标记
-            r.fillText('🪨', cx, cy, 'rgba(255,255,255,0.7)', 16)
+            r.fillText('🪨', cx, cy, 'rgba(255,255,255,0.7)', THEME.font.number.size)
           } else {
             // HP=1：裂纹石块，颜色偏暗
             r.fillRoundRect(x + 4, y + 4, size - 8, size - 8, 3, COLORS.obstacle.rockCracked)
@@ -1823,7 +1933,7 @@ export class SceneBattle {
             ctx.stroke()
             ctx.restore()
             // 破碎石块标记
-            r.fillText('🪨', cx, cy, 'rgba(255,255,255,0.5)', 14)
+            r.fillText('🪨', cx, cy, 'rgba(255,255,255,0.5)', THEME.font.body.size)
           }
         }
       }
@@ -1921,6 +2031,66 @@ export class SceneBattle {
     // 只在idle状态显示强化宝石发光（matching/falling时不显示，避免视觉干扰）
     // 当前版本：强化宝石在产生时立即爆炸，不留存棋盘
     // 未来如果改为"强化宝石留存在棋盘，点击/滑消时引爆"，这个方法用于渲染发光效果
+  }
+
+  _getMonsterAssetKey(monster) {
+    if (!monster) return null
+    if (monster.id === 'monster_boss_001') return 'bossGrass'
+    if (monster.id === 'monster_001') return 'monsterFire'
+    if (monster.id === 'monster_002') return 'monsterWater'
+    if (monster.id === 'monster_003') return 'monsterGrass'
+
+    // 临时复用：未单独拆分的普通敌人按属性映射到同系立绘，避免回退到emoji。
+    const elementMap = {
+      fire: 'monsterFire',
+      water: 'monsterWater',
+      grass: 'monsterGrass',
+    }
+    return elementMap[monster.element] || null
+  }
+
+  _drawGemAsset(r, type, cx, cy, size, opacity = 1) {
+    const key = GEM_ASSET_KEYS[type]
+    const asset = key ? this.artAssets[key] : null
+    if (!asset || !asset.loaded) return false
+    this._drawImageFit(r, asset.img, cx - size / 2, cy - size / 2, size, size, opacity)
+    return true
+  }
+
+  _drawImageFit(r, img, x, y, w, h, opacity = 1) {
+    if (!img) return false
+    const sx = x * r.scaleX
+    const sy = y * r.scaleY
+    const sw = w * r.scaleX
+    const sh = h * r.scaleY
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(img, sx, sy, sw, sh)
+    r.ctx.restore()
+    return true
+  }
+
+  _drawImageCover(r, img, x, y, w, h, opacity = 1) {
+    if (!img) return false
+    const srcRatio = img.width / img.height
+    const dstRatio = w / h
+    let sx = 0, sy = 0, sw = img.width, sh = img.height
+    if (srcRatio > dstRatio) {
+      sw = img.height * dstRatio
+      sx = (img.width - sw) / 2
+    } else {
+      sh = img.width / dstRatio
+      sy = (img.height - sh) / 2
+    }
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(
+      img,
+      sx, sy, sw, sh,
+      x * r.scaleX, y * r.scaleY, w * r.scaleX, h * r.scaleY
+    )
+    r.ctx.restore()
+    return true
   }
 
   destroy() {

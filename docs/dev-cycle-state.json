@@ -1,7 +1,7 @@
 {
-  "cycleCount": 161,
+  "cycleCount": 173,
   "lastTask": "plan",
-  "lastUpdateTime": "2026-05-15T14:05:34+08:00",
+  "lastUpdateTime": "2026-05-15T18:22:00+08:00",
   "completedFeatures": [
     {
       "name": "C4 状态效果 — 消除≥4同属性宝石附加灼烧/冰冻/中毒/眩晕",
@@ -84,18 +84,46 @@
       },
       "priority": "P0",
       "focus": "真实等级显示+性格标签(emoji+名称)+成长后属性+性格修正战力"
+    },
+    {
+      "name": "🏡 牧场系统 — 场景+挂机+入口实现",
+      "status": "深完成",
+      "dimensions": {
+        "功能完整性": true,
+        "交互体验": true,
+        "边界处理": true,
+        "用户体验": true,
+        "代码质量": true,
+        "数据一致性": true
+      },
+      "priority": "P0",
+      "focus": "sceneRanch.js完整场景+3槽位+怪物详情面板+挂机气泡+收取经验+主菜单入口+storage 4个方法"
+    },
+    {
+      "name": "D1 精英关卡 — Ch2~Ch11 全10个精英关卡",
+      "status": "深完成",
+      "dimensions": {
+        "功能完整性": true,
+        "交互体验": true,
+        "边界处理": true,
+        "用户体验": true,
+        "代码质量": true,
+        "数据一致性": true
+      },
+      "priority": "P0",
+      "focus": "Ch2~Ch11共10个精英关卡, 含蛇形石墙/对称锁定/混合障碍/菱形石墙/四角锁定/十字毒雾/混沌祭坛/光耀祭坛等独特布局"
     }
   ],
-  "currentPhase": 6,
-  "totalFilesCreated": 39,
+  "currentPhase": 7,
+  "totalFilesCreated": 40,
   "status": "running",
-  "phase": "visual-polish",
+  "phase": "polish-P0.3",
   "focusDimensions": [
-    "P0.2 字体规范 — 第一批(sceneTutorial/sceneMain/sceneStart)"
+    "P0.3 按钮样式统一 — P0.3.1✅ P0.3.2✅ P0.3.3-第一批(4场景)✅ P0.3.3-第二批(3场景)✅ P0.3.3-第三批✅ P0.3.3-第四批(sceneSignIn)✅"
   ],
   "polishState": {
     "currentLevel": "P0",
-    "currentTask": "Bug检查完成 → 下一循环继续 P0.2.2b 字体替换",
+    "currentTask": "Cycle 172 Code — P0.3.3第四批: sceneSignIn 3处按钮统一(返回+签到gold+已签到secondary) + theme.js新增gold按钮类型",
     "completedTasks": [
       "BD-P5",
       "宠物成长系统贯通",
@@ -104,68 +132,40 @@
       "P0.1.1 theme.js创建",
       "P0.1.2 sceneMain.js色调",
       "P0.1.3 sceneStart.js色调",
-      "P0.1.4 sceneBattle.js色调替换(37→0处) + sceneBattlePrepare(2处→0处)",
+      "P0.1.4 sceneBattle.js色调替换",
       "玩法丰富度全部完成(A1-D1+B3+C1+C2+C3)",
       "数值平衡全部完成(BD-P0~P6)",
-      "P0.1.5 sceneStageSelect+sceneResult 硬编码颜色替换(8处→0处)",
-      "P0.1.6 sceneAlbum+sceneEvolve+sceneTeamSetup 硬编码颜色替换(22处→0处)",
-      "P0.1.7 sceneSignIn粒子色→THEME + sceneBattle 6处#ffffff→COLORS.white — P0.1全部完成",
+      "P0.1.5 sceneStageSelect+sceneResult 硬编码颜色替换",
+      "P0.1.6 sceneAlbum+sceneEvolve+sceneTeamSetup 硬编码颜色替换",
+      "P0.1.7 剩余场景色调替换 — P0.1全部完成",
       "P0.2.1 theme.js 字体常量(FONT)已存在",
-      "P0.2.2a sceneTutorial(8处)+sceneMain(2处)+sceneStart(1处)字号替换 + theme.js新增display/icon常量"
+      "P0.2.2 全场景字号替换为THEME字体常量",
+      "牧场系统规划完成",
+      "牧场系统实现完成",
+      "D1精英关卡Ch2~Ch11全部完成(10个)",
+      "P0.3.1 drawButton方法+THEME.buttons预设创建完成",
+      "P0.3.2 sceneMain已用drawButton, sceneStart仅glow按钮保留",
+      "P0.3.3-sceneStageSelect 返回/章节导航/扫荡弹窗5个按钮改用drawButton",
+      "P0.3.3-第二批 sceneSettings(4处+确认弹窗渲染bug修复)+sceneAchievement(1处)+sceneInventory(2处)改用drawButton",
+      "Cycle 170 Bug专项检查 — 38个JS文件全通过，仅sceneSettings.js一处死代码",
+      "Cycle 171 Code — P0.3.3第三批完成: sceneAlbum(4处)+sceneEvolve(4处)+sceneTeamSetup(4处)按钮统一 + sceneSettings死代码清理",
+      "Cycle 172 Code — P0.3.3第四批完成: sceneSignIn(3处)按钮统一 + theme.js新增gold按钮类型"
     ],
     "gameplayPhase": "玩法丰富度 ✅ 全部完成",
     "balancePhase": "数值平衡 ✅ 全部完成",
-    "visualPhase": "P0.1 色调系统 ✅ 全部完成 → P0.2 字体规范 进行中"
+    "visualPhase": "P0.1 色调系统 ✅ → P0.2 字体规范 ✅ → P0.3 按钮样式统一 进行中(第四批sceneSignIn完成，剩余: sceneTutorial/sceneShop/sceneRanch)",
+    "ranchPhase": "✅ 牧场系统完成",
+    "elitePhase": "✅ D1 精英关卡全部完成 (10个)"
   },
-  "lastTarget": "Cycle 160 — Bug专项检查：32个JS文件语法OK、0个TODO/FIXME、init/destroy配对正确、流程走查全部通过、无bug",
-  "bugCheckCycle120": {
-    "checked": true,
-    "cycle": 120,
-    "syntaxErrors": 0,
-    "consoleErrors": 0,
-    "todoFixme": 0,
-    "initDestroyPaired": true,
-    "deadCode": 0,
-    "brokenRequires": 0,
-    "conclusion": "全部OK"
+  "lastTarget": "Cycle 173 Plan — P0.3.3第五批(最后): sceneTutorial(2处) + sceneShop(5处) + sceneRanch(2处+renderBtn改造) 按钮统一",
+  "ranchPlanning": {
+    "sceneRanch": "新建 js/ui/sceneRanch.js — 草地背景+怪物展示+选择栏+挂机气泡",
+    "storageMethods": "getRanchState(), setRanchMonster(), collectIdleExp(), getIdleExpRate()",
+    "mainMenuEntry": "主菜单新增🏡牧场入口按钮",
+    "idleMechanics": "每5分钟+经验, 基础2+等级×0.5, 气泡💤⭐❤️💪",
+    "slotLimit": "最多6槽(初始3免费), 金币扩展500/2000/5000"
   },
-  "bugCheckCycle140": {
-    "checked": true,
-    "cycle": 140,
-    "syntaxErrors": 0,
-    "consoleErrors": 0,
-    "todoFixme": 0,
-    "initDestroyPaired": true,
-    "deadCode": 0,
-    "brokenRequires": 0,
-    "conclusion": "全部OK，无bug"
-  },
-  "bugCheckCycle150": {
-    "checked": true,
-    "cycle": 150,
-    "syntaxErrors": 0,
-    "consoleErrors": 5,
-    "consoleErrorsNote": "均为合理错误处理日志(storage/eventBus/scene/settings)，非bug",
-    "todoFixme": 0,
-    "initDestroyPaired": true,
-    "deadCode": 0,
-    "brokenRequires": 0,
-    "flowWalkthrough": "全部通过",
-    "specialGems": "enhanced/rainbow/bomb 均正确集成",
-    "obstacles": "obstacle/lockedGems/poisonFog 均正确集成",
-    "conclusion": "全部OK，代码库状态良好，无bug"
-  },
-  "bugCheckCycle160": {
-    "checked": true,
-    "cycle": 160,
-    "syntaxErrors": 0,
-    "consoleErrors": 5,
-    "consoleErrorsNote": "均为合理错误处理日志(storage/eventBus/scene/settings)，非bug",
-    "todoFixme": 0,
-    "initDestroyPaired": true,
-    "deadCode": 0,
-    "brokenRequires": 0,
-    "flowWalkthrough": "全部通过，15个场景路径完整",
-    "conclusion": "全部OK，代码库状态良好，无bug"
+  "bugCheckCycle170": {
+    "note": "Cycle 170 检查完成 ✅ — 无严重Bug，仅1处低优先级死代码。下次检查: Cycle 180"
   }
 }

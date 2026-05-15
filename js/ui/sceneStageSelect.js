@@ -5,6 +5,62 @@
 import { THEME, COLORS } from '../engine/theme.js'
 import { chapters as STAGE_CHAPTERS } from '../../data/stages.js'
 
+const STAGE_ASSETS = {
+  bg: 'assets/images/stage/stage_map_bg.png',
+  headerBar: 'assets/images/stage/ui_header_bar.png',
+  backButton: 'assets/images/stage/ui_back_button.png',
+  arrowButton: 'assets/images/stage/ui_arrow_button.png',
+  rewardPanel: 'assets/images/stage/ui_reward_panel_clean.png',
+  nodeNormal: 'assets/images/stage/node_normal.png',
+  nodeSelected: 'assets/images/stage/node_selected.png',
+  nodeLocked: 'assets/images/stage/node_locked.png',
+  nodeChest: 'assets/images/stage/node_chest.png',
+  nodeCrystal: 'assets/images/stage/node_crystal.png',
+  bossBadge: 'assets/images/stage/boss_badge.png',
+  bossFlower: 'assets/images/stage/boss_flower.png',
+  starLit: 'assets/images/stage/icon_star_lit.png',
+  starDim: 'assets/images/stage/icon_star_dim.png',
+  pathDot: 'assets/images/stage/icon_path_dot.png',
+  chapterBadge: 'assets/images/stage/icon_chapter_badge.png',
+  goldCoin: 'assets/images/stage/icon_gold_coin.png',
+  expBadge: 'assets/images/stage/icon_exp_badge.png',
+  captureBall: 'assets/images/stage/icon_capture_ball.png',
+  gemFire: 'assets/images/stage/icon_gem_fire.png',
+  gemWater: 'assets/images/stage/icon_gem_water.png',
+  gemGrass: 'assets/images/stage/icon_gem_grass.png',
+  gemThunder: 'assets/images/stage/icon_gem_thunder.png',
+  gemLight: 'assets/images/stage/icon_gem_light.png',
+  backArrow: 'assets/images/stage/icon_back_arrow.png',
+  prevArrow: 'assets/images/stage/icon_prev_arrow.png',
+  nextArrow: 'assets/images/stage/icon_next_arrow.png',
+}
+
+const MAP_NODE_POSITIONS = [
+  { x: 58, y: 472 },
+  { x: 80, y: 408 },
+  { x: 132, y: 354 },
+  { x: 190, y: 377 },
+  { x: 252, y: 348 },
+  { x: 250, y: 282 },
+  { x: 147, y: 281 },
+  { x: 82, y: 222 },
+  { x: 90, y: 166 },
+  { x: 154, y: 124 },
+]
+
+const MAP_BOSS_POSITION = { x: 296, y: 164 }
+
+const REWARD_ITEMS = [
+  { key: 'goldCoin', count: 'x500' },
+  { key: 'expBadge', count: 'x200' },
+  { key: 'captureBall', count: 'x1' },
+  { key: 'gemFire', count: 'x2' },
+  { key: 'gemWater', count: 'x2' },
+  { key: 'gemGrass', count: 'x2' },
+  { key: 'gemThunder', count: 'x2' },
+  { key: 'gemLight', count: 'x1' },
+]
+
 export class SceneStageSelect {
   constructor(game, data) {
     this.game = game
@@ -46,6 +102,10 @@ export class SceneStageSelect {
     // 设计尺寸
     this.designW = 375
     this.designH = 667
+
+    // 地图式关卡选择美术资源
+    this.artAssets = {}
+    this.artReady = false
   }
 
   init(data) {
@@ -56,9 +116,36 @@ export class SceneStageSelect {
       this.currentChapterIndex = Math.max(0, Math.min(data.chapterIndex, this.chapters.length - 1))
     }
     this._buildCards()
+    this._loadArtAssets()
     this.game.input.onTap = this.tapCallback
     this.game.input.onTouchStart = this.touchStartCallback
     this.game.input.onTouchEnd = this.touchEndCallback
+  }
+
+  _loadArtAssets() {
+    if (this._artLoadingStarted) return
+    this._artLoadingStarted = true
+
+    const entries = Object.entries(STAGE_ASSETS)
+    let loadedCount = 0
+    this.artAssets = {}
+
+    entries.forEach(([key, src]) => {
+      const img = wx.createImage()
+      const item = { img, loaded: false, src }
+      this.artAssets[key] = item
+      img.onload = () => {
+        item.loaded = true
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.onerror = () => {
+        console.warn(`[SceneStageSelect] 美术资源加载失败: ${src}`)
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.src = src
+    })
   }
 
   _loadStageData() {
@@ -67,10 +154,6 @@ export class SceneStageSelect {
 
   _buildCards() {
     this.cards = []
-    const startY = 140  // 章节标题栏下方开始
-    const gap = 12
-    let y = startY
-
     // 只构建当前章节的卡片
     if (this.chapters.length === 0) return
 
@@ -78,32 +161,39 @@ export class SceneStageSelect {
     if (!chapter) return
 
     // 关卡列表
-    for (const stage of chapter.stages) {
+    let nodeIndex = 0
+    for (let i = 0; i < chapter.stages.length; i++) {
+      const stage = chapter.stages[i]
       const isBoss = stage.type === 'boss'
       const isElite = stage.type === 'elite'
       const stars = this.storage.getStageStars(stage.id)
       const canSweep = this.storage.canSweep(stage.id)
 
-      let icon = '⚔️'
-      if (isBoss) icon = '🔴'
-      if (isElite) icon = '💎'
+      const pos = isBoss ? MAP_BOSS_POSITION : (MAP_NODE_POSITIONS[nodeIndex] || MAP_NODE_POSITIONS[MAP_NODE_POSITIONS.length - 1])
+      if (!isBoss) nodeIndex++
+      const nodeW = isBoss ? 112 : 58
+      const nodeH = isBoss ? 112 : 58
 
       this.cards.push({
         type: 'stage',
         id: stage.id,
-        text: `${icon} ${stage.name}`,
-        x: (this.designW - this.cardW) / 2,
-        y: y,
-        w: this.cardW,
-        h: this.cardH,
+        text: stage.name,
+        stageNo: i + 1,
+        x: pos.x - nodeW / 2,
+        y: pos.y - nodeH / 2,
+        cx: pos.x,
+        cy: pos.y,
+        w: nodeW,
+        h: nodeH,
         enabled: true,
         chapterId: chapter.id,
         stageData: stage,
         stars: stars,
         canSweep: canSweep,
-        isElite: isElite
+        isElite: isElite,
+        isBoss: isBoss,
+        sweepRect: { x: pos.x + 24, y: pos.y - 26, w: 30, h: 26 }
       })
-      y += this.cardH + gap
     }
   }
 
@@ -127,14 +217,14 @@ export class SceneStageSelect {
     }
 
     // 检查返回按钮
-    if (x < 60 && y < 40) {
+    if (x >= 10 && x <= 60 && y >= 10 && y <= 60) {
       this.touchedBtn = 'backBtn'
       return
     }
 
     // 检查上一章按钮（标题栏左侧）
     if (this.currentChapterIndex > 0) {
-      if (x >= 10 && x <= 50 && y >= 75 && y <= 115) {
+      if (x >= 76 && x <= 108 && y >= 28 && y <= 60) {
         this.touchedBtn = 'prevChapter'
         return
       }
@@ -142,7 +232,7 @@ export class SceneStageSelect {
 
     // 检查下一章按钮（标题栏右侧）
     if (this.currentChapterIndex < this.chapters.length - 1) {
-      if (x >= this.designW - 50 && x <= this.designW - 10 && y >= 75 && y <= 115) {
+      if (x >= this.designW - 46 && x <= this.designW - 14 && y >= 28 && y <= 60) {
         this.touchedBtn = 'nextChapter'
         return
       }
@@ -206,38 +296,36 @@ export class SceneStageSelect {
 
     // 上一章按钮
     if (this.currentChapterIndex > 0 &&
-        x >= 10 && x <= 50 && y >= 75 && y <= 115) {
+        x >= 76 && x <= 108 && y >= 28 && y <= 60) {
       this._switchChapter(-1)
       return
     }
 
     // 下一章按钮
     if (this.currentChapterIndex < this.chapters.length - 1 &&
-        x >= this.designW - 50 && x <= this.designW - 10 && y >= 75 && y <= 115) {
+        x >= this.designW - 46 && x <= this.designW - 14 && y >= 28 && y <= 60) {
       this._switchChapter(1)
       return
     }
 
     for (const card of this.cards) {
       if (!card.enabled) continue
+      const sweep = card.sweepRect
+      if (card.canSweep && sweep && x >= sweep.x && x <= sweep.x + sweep.w && y >= sweep.y && y <= sweep.y + sweep.h) {
+        console.log(`[SceneStageSelect] 点击扫荡按钮: ${card.id}`)
+        this._showSweepDialog(card.id, card.text)
+        return
+      }
       if (x >= card.x && x <= card.x + card.w && y >= card.y && y <= card.y + card.h) {
         if (card.type === 'stage') {
-          // 检查是否点击扫荡按钮（右侧区域）
-          const sweepBtnX = card.x + card.w - 60
-          const sweepBtnW = 55
-          if (card.canSweep && x >= sweepBtnX && x <= card.x + card.w) {
-            console.log(`[SceneStageSelect] 点击扫荡按钮: ${card.id}`)
-            this._showSweepDialog(card.id, card.text)
-          } else {
-            console.log(`[SceneStageSelect] 选择关卡: ${card.id}`)
-            this.game.sceneManager.changeScene('battlePrepare', { stageId: card.id, stageData: card.stageData, chapterIndex: this.currentChapterIndex })
-          }
+          console.log(`[SceneStageSelect] 选择关卡: ${card.id}`)
+          this.game.sceneManager.changeScene('battlePrepare', { stageId: card.id, stageData: card.stageData, chapterIndex: this.currentChapterIndex })
         }
         return
       }
     }
     // 点击返回区域
-    if (x < 60 && y < 40) {
+    if (x >= 10 && x <= 60 && y >= 10 && y <= 60) {
       this.game.sceneManager.changeScene('main', {}, 'slide')
     }
   }
@@ -281,18 +369,14 @@ export class SceneStageSelect {
   }
 
   render(r) {
-    r.fillRect(0, 0, this.designW, this.designH, THEME.colors.bgMedium)
+    if (this.artAssets.bg && this.artAssets.bg.loaded) {
+      this._drawImageCover(r, this.artAssets.bg.img, 0, 0, this.designW, this.designH)
+      r.fillRect(0, 0, this.designW, this.designH, 'rgba(4, 12, 28, 0.08)')
+    } else {
+      r.fillRect(0, 0, this.designW, this.designH, THEME.colors.bgMedium)
+    }
 
-    // 返回按钮
-    const backPressed = this.touchedBtn === 'backBtn'
-    const backBg = backPressed ? 'rgba(255, 255, 255, 0.25)' : THEME.colors.bgCard
-    r.fillRoundRect(10, 10, 50, 30, THEME.radius.sm, backBg)
-    r.fillText('← 返回', 35, 30, COLORS.textPrimary, THEME.font.small.size, THEME.font.small.weight)
-
-    // 页面标题
-    r.fillText('📋 选择关卡', this.designW / 2, 60, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
-
-    // ===== 章节标题栏 =====
+    // 顶部章节条
     this._renderChapterHeader(r)
 
     // ===== 关卡卡片 =====
@@ -307,11 +391,15 @@ export class SceneStageSelect {
       offsetX = dir * this.designW * (1 - eased) * -1
     }
 
+    this._renderStagePath(r, offsetX)
+
     for (const card of this.cards) {
       if (card.type === 'stage') {
         this._renderStageCard(r, card, offsetX)
       }
     }
+
+    this._renderRewardPanel(r)
 
     // 扫荡确认弹窗
     if (this.sweepDialog.active) {
@@ -325,39 +413,67 @@ export class SceneStageSelect {
   }
 
   _renderChapterHeader(r) {
-    const headerY = 75
-    const headerH = 40
+    const headerY = 11
+    const headerH = 64
     const totalChapters = this.chapters.length
     const currentNum = this.currentChapterIndex + 1
     const chapter = this.chapters[this.currentChapterIndex]
 
     if (!chapter) return
 
+    // 返回按钮
+    const backPressed = this.touchedBtn === 'backBtn'
+    const back = this.artAssets.backButton
+    if (back && back.loaded) {
+      this._drawImageFit(r, back.img, 10, 12, 52, 52, backPressed ? 0.82 : 1)
+    } else {
+      r.drawButton({ x: 10, y: 12, w: 52, h: 52, text: '' }, 'secondary', backPressed ? 0.9 : 1)
+    }
+    const backArrow = this.artAssets.backArrow
+    if (backArrow && backArrow.loaded) this._drawImageFit(r, backArrow.img, 19, 21, 34, 34, 1)
+
     // 章节标题栏背景
-    r.fillRoundRect(15, headerY, this.designW - 30, headerH, THEME.radius.md, THEME.colors.bgCard)
+    const header = this.artAssets.headerBar
+    if (header && header.loaded) {
+      this._drawImageFit(r, header.img, 69, headerY, 296, headerH, 1)
+    } else {
+      r.fillRoundRect(69, headerY, 296, headerH, THEME.radius.md, THEME.colors.bgCard)
+    }
+
+    const badge = this.artAssets.chapterBadge
+    if (badge && badge.loaded) {
+      this._drawImageFit(r, badge.img, 82, 20, 34, 38, 1)
+      r.fillText(`${currentNum}`, 99, 38, COLORS.white, THEME.font.small.size, 'center', 'bold')
+    }
 
     // 上一章按钮（◀）
     if (this.currentChapterIndex > 0) {
       const prevPressed = this.touchedBtn === 'prevChapter'
-      const prevBg = prevPressed ? 'rgba(255, 255, 255, 0.25)' : THEME.colors.bgMedium
-      r.fillRoundRect(20, headerY + 5, 35, 30, THEME.radius.sm, prevBg)
-      r.fillText('◀', 37, headerY + 25, COLORS.textPrimary, 16, 'bold')
+      const prev = this.artAssets.prevArrow
+      if (prev && prev.loaded) this._drawImageFit(r, prev.img, 76, 28, 32, 32, prevPressed ? 0.8 : 1)
+      else r.fillText('◀', 92, 44, COLORS.white, THEME.font.body.size)
     }
 
     // 下一章按钮（▶）
     if (this.currentChapterIndex < totalChapters - 1) {
       const nextPressed = this.touchedBtn === 'nextChapter'
-      const nextBg = nextPressed ? 'rgba(255, 255, 255, 0.25)' : THEME.colors.bgMedium
-      r.fillRoundRect(this.designW - 55, headerY + 5, 35, 30, THEME.radius.sm, nextBg)
-      r.fillText('▶', this.designW - 38, headerY + 25, COLORS.textPrimary, 16, 'bold')
+      const next = this.artAssets.nextArrow
+      if (next && next.loaded) this._drawImageFit(r, next.img, this.designW - 46, 28, 32, 32, nextPressed ? 0.8 : 1)
+      else r.fillText('▶', this.designW - 30, 44, COLORS.white, THEME.font.body.size)
     }
 
     // 章节标题文字（居中）
-    const titleText = `📍 ${currentNum}/${totalChapters} ${chapter.name}`
-    r.fillText(titleText, this.designW / 2, headerY + 26, COLORS.gold, 14, 'bold')
+    r.fillText(`第${currentNum}章`, 142, 36, COLORS.success, THEME.font.subtitle.size, 'center', 'bold')
+    r.fillText(chapter.name, 255, 36, COLORS.textPrimary, THEME.font.subtitle.size, 'center', 'bold')
+
+    const chapterStars = this._getChapterStars(chapter)
+    const totalStars = Math.max((chapter.stages || []).length * 3, 1)
+    const star = this.artAssets.starLit
+    if (star && star.loaded) this._drawImageFit(r, star.img, 139, 52, 18, 18, 1)
+    r.fillText(`${chapterStars}/${totalStars}`, 191, 63, COLORS.textPrimary, THEME.font.body.size, 'center', 'bold')
 
     // 页面指示器小圆点
-    this._renderPageDots(r, this.designW / 2, headerY + headerH + 12, totalChapters, this.currentChapterIndex)
+    this._renderPageDots(r, this.designW / 2, headerY + headerH + 9, totalChapters, this.currentChapterIndex)
   }
 
   _renderPageDots(r, cx, cy, total, current) {
@@ -406,7 +522,7 @@ export class SceneStageSelect {
 
         // 如果和前一个 dot 不连续，画省略号
         if (prevIndex >= 0 && i - prevIndex > 1) {
-          r.fillText('…', x - dotSpacing / 2, cy + 1, 'rgba(255, 255, 255, 0.4)', 8)
+          r.fillText('…', x - dotSpacing / 2, cy + 1, 'rgba(255, 255, 255, 0.4)', THEME.font.tiny.size)
         }
 
         const isActive = i === current
@@ -420,68 +536,120 @@ export class SceneStageSelect {
     }
   }
 
+  _getChapterStars(chapter) {
+    if (!chapter || !chapter.stages) return 0
+    return chapter.stages.reduce((sum, stage) => sum + this.storage.getStageStars(stage.id), 0)
+  }
+
+  _renderStagePath(r, offsetX) {
+    const cards = this.cards.filter(card => card.type === 'stage')
+    for (let i = 0; i < cards.length - 1; i++) {
+      this._drawPathDots(r, cards[i].cx + offsetX, cards[i].cy, cards[i + 1].cx + offsetX, cards[i + 1].cy)
+    }
+  }
+
+  _drawPathDots(r, x1, y1, x2, y2) {
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const dist = Math.sqrt(dx * dx + dy * dy)
+    const steps = Math.max(1, Math.floor(dist / 16))
+    const dot = this.artAssets.pathDot
+
+    for (let i = 1; i < steps; i++) {
+      const t = i / steps
+      const x = x1 + dx * t
+      const y = y1 + dy * t
+      if (dot && dot.loaded) this._drawImageFit(r, dot.img, x - 4, y - 4, 8, 8, 0.92)
+      else r.fillCircle(x, y, 3, '#fff0c7', 0.9)
+    }
+  }
+
   _renderStageCard(r, card, offsetX) {
     const isBoss = card.stageData && card.stageData.type === 'boss'
     const isElite = card.isElite || (card.stageData && card.stageData.type === 'elite')
-    let baseColor = COLORS.primary
-    if (isBoss) baseColor = COLORS.danger
-    if (isElite) baseColor = COLORS.elite
     const isPressed = this.touchedBtn === card.id
 
     const drawX = card.x + offsetX
+    const drawCx = card.cx + offsetX
 
-    // 精英关卡：金色渐变边框
-    if (isElite) {
-      r.strokeRoundRect(drawX - 2, card.y - 2, card.w + 4, card.h + 4, THEME.radius.md + 1, COLORS.gold, 2)
+    if (isBoss) {
+      const boss = this.artAssets.bossBadge
+      if (boss && boss.loaded) {
+        this._drawImageFit(r, boss.img, drawX - 7, card.y - 18, card.w + 22, card.h + 45, isPressed ? 0.82 : 1)
+      } else {
+        r.fillRoundRect(drawX, card.y, card.w, card.h, THEME.radius.lg, COLORS.danger)
+      }
+      const bossFlower = this.artAssets.bossFlower
+      if (bossFlower && bossFlower.loaded) {
+        this._drawImageFit(r, drawCx - 49, card.y - 28, 98, 98, isPressed ? 0.82 : 1)
+      }
+      r.fillText('BOSS', drawCx, card.y + card.h - 24, COLORS.gold, THEME.font.body.size, 'center', 'bold')
+      this._renderStars(r, drawCx - 23, card.y + card.h - 4, card.stars)
+      return
     }
 
-    // 卡片背景
-    r.fillRoundRect(drawX, card.y, card.w, card.h, THEME.radius.md, baseColor)
+    let nodeKey = isElite ? 'nodeCrystal' : 'nodeNormal'
+    if (card.stars >= 3 && card.stageNo === this.cards.length) nodeKey = 'nodeChest'
+    if (isPressed) nodeKey = 'nodeSelected'
+    const node = this.artAssets[nodeKey]
+    const nodeW = isElite ? 64 : 58
+    const nodeH = isElite ? 70 : 58
+    const nodeX = drawCx - nodeW / 2
+    const nodeY = card.cy - nodeH / 2
 
-    // 按压时叠加暗色层
-    if (isPressed) {
-      r.fillRoundRect(drawX, card.y, card.w, card.h, THEME.radius.md, 'rgba(0, 0, 0, 0.15)')
-    }
+    if (node && node.loaded) this._drawImageFit(r, node.img, nodeX, nodeY, nodeW, nodeH, 1)
+    else r.fillCircle(drawCx, card.cy, 26, COLORS.primary, 0.95)
 
-    // 精英标签
-    if (isElite) {
-      r.fillRoundRect(drawX + card.w - 58, card.y + 4, 52, 16, 4, COLORS.gold)
-      r.fillText('ELITE', drawX + card.w - 32, card.y + 15, COLORS.eliteText, 9, 'bold')
-    }
+    r.fillText(`${card.stageNo}`, drawCx, card.cy + (isElite ? 2 : -1), COLORS.white, THEME.font.number.size, 'center', 'bold')
+    this._renderStars(r, drawCx - 22, card.cy + 31, card.stars)
 
-    // 关卡名称
-    const nameX = drawX + 15
-    const nameY = card.y + card.h / 2 - 5
-    r.fillText(card.text, nameX, nameY, COLORS.textPrimary, 13, 'bold')
-
-    // 星级显示（卡片中间偏左）
-    this._renderStars(r, drawX + card.w - 90, card.y + card.h / 2 + 2, card.stars)
-
-    // 扫荡按钮（3星关卡）
     if (card.canSweep) {
-      this._renderSweepButton(r, drawX + card.w - 65, card.y + card.h / 2 - 12)
-    } else if (card.stars > 0) {
-      // 非3星显示锁定的扫荡图标
-      r.fillText('🔒', drawX + card.w - 45, card.y + card.h / 2 + 2, COLORS.textMuted, 14)
+      this._renderSweepButton(r, card.sweepRect.x + offsetX, card.sweepRect.y)
     }
   }
 
   _renderStars(r, x, y, count) {
-    const size = 16
-    const spacing = 18
+    const spacing = 16
     for (let i = 0; i < 3; i++) {
       const isLit = i < count
-      const star = isLit ? '⭐' : '☆'
-      const alpha = isLit ? 1 : 0.3
-      r.fillText(star, x + i * spacing, y, `rgba(255, 215, 0, ${alpha})`, size)
+      const asset = isLit ? this.artAssets.starLit : this.artAssets.starDim
+      if (asset && asset.loaded) this._drawImageFit(r, asset.img, x + i * spacing, y - 7, 14, 14, isLit ? 1 : 0.45)
+      else r.fillText(isLit ? '★' : '☆', x + i * spacing + 7, y, `rgba(255, 215, 0, ${isLit ? 1 : 0.35})`, THEME.font.small.size)
     }
   }
 
   _renderSweepButton(r, x, y) {
     const pulse = Math.sin(Date.now() / 400) * 0.15 + 0.85
-    // 橙色/金色渐变背景
-    r.fillRoundRect(x, y, 55, 24, 6, `rgba(255, 150, 0, ${pulse})`)
-    r.fillText('⚡扫荡', x + 27, y + 16, COLORS.textPrimary, 11, 'bold')
+    const thunder = this.artAssets.gemThunder
+    r.fillRoundRect(x, y, 28, 24, 9, `rgba(255, 150, 0, ${pulse})`)
+    if (thunder && thunder.loaded) this._drawImageFit(r, thunder.img, x + 4, y + 2, 20, 20, 1)
+    else r.fillText('⚡', x + 14, y + 13, COLORS.textPrimary, THEME.font.tiny.size, 'center', 'bold')
+  }
+
+  _renderRewardPanel(r) {
+    const panel = this.artAssets.rewardPanel
+    const x = 13
+    const y = 544
+    const w = 349
+    const h = 108
+
+    if (panel && panel.loaded) this._drawImageFit(r, panel.img, x, y, w, h, 0.98)
+    else r.fillRoundRect(x, y, w, h, THEME.radius.lg, THEME.colors.bgPanel, 0.92)
+
+    r.fillText('通关奖励', this.designW / 2, y + 20, COLORS.textPrimary, THEME.font.body.size, 'center', 'bold')
+
+    const slotW = 39
+    const gap = 4
+    const startX = 23
+    const iconY = y + 37
+    for (let i = 0; i < REWARD_ITEMS.length; i++) {
+      const item = REWARD_ITEMS[i]
+      const sx = startX + i * (slotW + gap)
+      r.fillRoundRect(sx, iconY, slotW, 56, 6, 'rgba(32, 34, 72, 0.82)')
+      const asset = this.artAssets[item.key]
+      if (asset && asset.loaded) this._drawImageFit(r, asset.img, sx + 6, iconY + 5, 27, 27, 1)
+      r.fillText(item.count, sx + slotW / 2, iconY + 45, COLORS.textPrimary, THEME.font.tiny.size, 'center', 'bold')
+    }
   }
 
   _renderSweepDialog(r) {
@@ -494,26 +662,30 @@ export class SceneStageSelect {
     r.fillRect(0, 0, this.designW, this.designH, 'rgba(0, 0, 0, 0.6)')
 
     // 弹窗背景
-    r.fillRoundRect(dlgX, dlgY, dlgW, dlgH, THEME.radius.lg, THEME.colors.bgPanel)
+    const panel = this.artAssets.rewardPanel
+    if (panel && panel.loaded) this._drawImageFit(r, panel.img, dlgX, dlgY, dlgW, dlgH, 0.96)
+    else r.fillRoundRect(dlgX, dlgY, dlgW, dlgH, THEME.radius.lg, THEME.colors.bgPanel)
 
     // 标题
-    r.fillText('⚡ 确认扫荡', this.designW / 2, dlgY + 30, COLORS.gold, 16, 'bold')
+    const thunder = this.artAssets.gemThunder
+    if (thunder && thunder.loaded) this._drawImageFit(r, thunder.img, this.designW / 2 - 58, dlgY + 16, 24, 24, 1)
+    r.fillText('确认扫荡', this.designW / 2 + 8, dlgY + 30, COLORS.gold, THEME.font.number.size, 'center', 'bold')
 
     // 描述
-    r.fillText('扫荡此关卡将直接获得奖励', this.designW / 2, dlgY + 55, COLORS.textMuted, 12)
-    r.fillText('（无需进入战斗）', this.designW / 2, dlgY + 73, COLORS.textMuted, 11)
+    r.fillText('扫荡此关卡将直接获得奖励', this.designW / 2, dlgY + 55, COLORS.textMuted, THEME.font.small.size)
+    r.fillText('（无需进入战斗）', this.designW / 2, dlgY + 73, COLORS.textMuted, THEME.font.tiny.size)
 
     // 奖励预览
     const reward = this.storage ? this.storage.getSweepReward(this.sweepDialog.stageId) : { gold: 120, exp: 96 }
-    r.fillText(`💰 +${reward.gold}  金币`, this.designW / 2, dlgY + 93, COLORS.gold, 12)
+    const coin = this.artAssets.goldCoin
+    if (coin && coin.loaded) this._drawImageFit(r, coin.img, this.designW / 2 - 62, dlgY + 80, 22, 22, 1)
+    r.fillText(`+${reward.gold} 金币`, this.designW / 2 + 10, dlgY + 93, COLORS.gold, THEME.font.small.size)
 
     // 确认按钮
-    r.fillRoundRect(dlgX + 20, dlgY + 95, 100, 40, THEME.radius.md, THEME.buttons.secondary.bgColor)
-    r.fillText('确认扫荡', dlgX + 70, dlgY + 120, COLORS.textPrimary, 13, 'bold')
+    r.drawButton({ x: dlgX + 20, y: dlgY + 95, w: 100, h: 40, text: '确认扫荡' }, 'secondary', 1)
 
     // 取消按钮
-    r.fillRoundRect(dlgX + 140, dlgY + 95, 100, 40, THEME.radius.md, THEME.buttons.danger.bgColor)
-    r.fillText('取消', dlgX + 190, dlgY + 120, COLORS.textPrimary, 13, 'bold')
+    r.drawButton({ x: dlgX + 140, y: dlgY + 95, w: 100, h: 40, text: '取消' }, 'danger', 1)
   }
 
   _renderSweepAnim(r) {
@@ -524,7 +696,9 @@ export class SceneStageSelect {
 
     // 标题
     const titleY = 200
-    r.fillText('⚡ 扫荡完成！', this.designW / 2, titleY, COLORS.gold, 20, 'bold')
+    const thunder = this.artAssets.gemThunder
+    if (thunder && thunder.loaded) this._drawImageFit(r, thunder.img, this.designW / 2 - 78, titleY - 17, 32, 32, 1)
+    r.fillText('扫荡完成！', this.designW / 2 + 10, titleY, COLORS.gold, THEME.font.bigNum.size, 'center', 'bold')
 
     // 金币飞入动画
     const goldStartX = this.designW / 2 - 50
@@ -535,8 +709,9 @@ export class SceneStageSelect {
     const goldY = goldStartY + (goldEndY - goldStartY) * progress - Math.sin(progress * Math.PI) * 30
 
     if (progress < 0.8) {
-      r.fillText('💰', goldX, goldY, COLORS.gold, 24)
-      r.fillText(`+${this.sweepAnim.gold} 金币`, goldX + 30, goldY + 5, COLORS.gold, 14)
+      const coin = this.artAssets.goldCoin
+      if (coin && coin.loaded) this._drawImageFit(r, coin.img, goldX - 12, goldY - 13, 26, 26, 1)
+      r.fillText(`+${this.sweepAnim.gold} 金币`, goldX + 30, goldY + 5, COLORS.gold, THEME.font.body.size)
     }
 
     // 经验飞入动画（延迟）
@@ -549,13 +724,14 @@ export class SceneStageSelect {
       const expX = expStartX + (expEndX - expStartX) * expProg
       const expY = expStartY + (expEndY - expStartY) * expProg - Math.sin(expProg * Math.PI) * 30
 
-      r.fillText('✨', expX, expY, COLORS.thunder, 24)
-      r.fillText(`+${this.sweepAnim.exp} 经验`, expX + 30, expY + 5, COLORS.thunder, 14)
+      const exp = this.artAssets.expBadge
+      if (exp && exp.loaded) this._drawImageFit(r, exp.img, expX - 12, expY - 13, 26, 26, 1)
+      r.fillText(`+${this.sweepAnim.exp} 经验`, expX + 30, expY + 5, COLORS.thunder, THEME.font.body.size)
     }
 
     // 完成后显示关闭提示
     if (progress >= 1) {
-      r.fillText('点击任意处继续', this.designW / 2, 420, COLORS.textMuted, 12)
+      r.fillText('点击任意处继续', this.designW / 2, 420, COLORS.textMuted, THEME.font.small.size)
     }
   }
 
@@ -563,6 +739,35 @@ export class SceneStageSelect {
     this.game.input.onTap = null
     this.game.input.onTouchStart = null
     this.game.input.onTouchEnd = null
+  }
+
+  _drawImageFit(r, img, x, y, w, h, opacity = 1) {
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(img, x * r.scaleX, y * r.scaleY, w * r.scaleX, h * r.scaleY)
+    r.ctx.restore()
+  }
+
+  _drawImageCover(r, img, x, y, w, h, opacity = 1) {
+    const srcRatio = img.width / img.height
+    const dstRatio = w / h
+    let sx = 0
+    let sy = 0
+    let sw = img.width
+    let sh = img.height
+
+    if (srcRatio > dstRatio) {
+      sw = img.height * dstRatio
+      sx = (img.width - sw) / 2
+    } else {
+      sh = img.width / dstRatio
+      sy = (img.height - sh) / 2
+    }
+
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(img, sx, sy, sw, sh, x * r.scaleX, y * r.scaleY, w * r.scaleX, h * r.scaleY)
+    r.ctx.restore()
   }
 }
 

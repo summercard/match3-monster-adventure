@@ -162,8 +162,7 @@ export class SceneSignIn {
     r.fillRect(0, 0, w, h, COLORS.bgMedium)
 
     // 返回按钮
-    r.fillRoundRect(15, 15, 60, 35, THEME.radius.sm, THEME.buttons.primary.bgColor)
-    r.fillText('← 返回', 45, 33, COLORS.textSecondary, THEME.font.body.size, THEME.font.body.weight)
+    r.drawButton({ x: 15, y: 15, w: 60, h: 35, text: '← 返回' }, 'secondary')
 
     // 标题
     r.fillText('📅 每日签到', w / 2, 70, COLORS.textPrimary, THEME.font.title.size, THEME.font.title.weight)
@@ -240,12 +239,10 @@ export class SceneSignIn {
 
     if (this.canSignIn) {
       // 可签到状态
-      r.fillRoundRect(signBtn.x, signBtn.y, signBtn.w, signBtn.h, THEME.radius.lg, COLORS.gold)
-      r.fillText('🎊 签到领奖', signBtn.x + signBtn.w / 2, signBtn.y + signBtn.h / 2 + 8, COLORS.bgMedium, THEME.font.title.size, THEME.font.title.weight)
+      r.drawButton({ x: signBtn.x, y: signBtn.y, w: signBtn.w, h: signBtn.h, text: '🎊 签到领奖' }, 'gold')
     } else {
       // 已签到状态
-      r.fillRoundRect(signBtn.x, signBtn.y, signBtn.w, signBtn.h, THEME.radius.lg, COLORS.textMuted)
-      r.fillText('✅ 今日已签到', signBtn.x + signBtn.w / 2, signBtn.y + signBtn.h / 2 + 8, COLORS.textSecondary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
+      r.drawButton({ x: signBtn.x, y: signBtn.y, w: signBtn.w, h: signBtn.h, text: '✅ 今日已签到' }, 'secondary')
     }
 
     // 绘制粒子效果

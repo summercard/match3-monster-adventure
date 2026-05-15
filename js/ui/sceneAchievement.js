@@ -146,8 +146,7 @@ export class SceneAchievement {
     r.fillRect(0, 0, w, h, COLORS.bgMedium)
 
     // 返回按钮
-    r.fillRoundRect(15, 15, 60, 35, THEME.radius.sm, THEME.buttons.primary.bgColor)
-    r.fillText('← 返回', 45, 33, COLORS.textSecondary, THEME.font.body.size, THEME.font.body.weight)
+    r.drawButton({ x: 15, y: 15, w: 60, h: 35, text: '← 返回' }, 'secondary')
 
     // 标题
     r.fillText('🏆 成就', w / 2, 70, COLORS.gold, THEME.font.title.size, THEME.font.title.weight)

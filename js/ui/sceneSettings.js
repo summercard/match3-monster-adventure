@@ -198,15 +198,13 @@ export class SceneSettings {
 
     // 返回按钮
     const back = this.ui.backBtn
-    r.fillRoundRect(back.x, back.y, back.w, back.h, THEME.radius.sm, THEME.buttons.primary.bgColor)
-    r.fillText(back.label, back.x + back.w / 2, back.y + back.h / 2 + 5, COLORS.textSecondary, THEME.font.small.size, THEME.font.small.weight)
+    r.drawButton({ x: back.x, y: back.y, w: back.w, h: back.h, text: back.label }, 'secondary')
 
     // 设置项
     for (const item of this.ui.items) {
       if (item.id === 'reset') {
         // 重置按钮 - 红色警示风格
-        r.fillRoundRect(item.x, item.y, item.w, item.h, THEME.radius.md, COLORS.danger)
-        r.fillText(item.label, item.x + item.w / 2, item.y + item.h / 2 + 6, COLORS.danger, THEME.font.body.size, THEME.font.body.weight)
+        r.drawButton({ x: item.x, y: item.y, w: item.w, h: item.h, text: item.label }, 'danger')
       } else {
         // 开关设置项背景
         r.fillRoundRect(item.x, item.y, item.w, item.h, THEME.radius.md, COLORS.bgCard)
@@ -226,6 +224,21 @@ export class SceneSettings {
         // ON/OFF 文字
         r.fillText(isOn ? 'ON' : 'OFF', toggleX + item.toggleW / 2, toggleY + item.toggleH / 2 + 4, isOn ? COLORS.white : COLORS.textMuted, THEME.font.tiny.size, THEME.font.tiny.weight)
       }
+    }
+
+    // 确认弹窗
+    if (this.confirmDialog) {
+      const d = this.confirmDialog
+      // 遮罩
+      r.fillRect(0, 0, 375, 667, 'rgba(0,0,0,0.7)')
+      // 弹窗背景
+      r.fillRoundRect(d.box.x, d.box.y, d.box.w, d.box.h, THEME.radius.lg, COLORS.bgCard)
+      // 提示文字
+      r.fillText('确认重置？', d.box.x + d.box.w / 2, d.box.y + 40, COLORS.danger, THEME.font.subtitle.size, THEME.font.subtitle.weight)
+      r.fillText('所有数据将被清除，无法恢复', d.box.x + d.box.w / 2, d.box.y + 65, COLORS.textMuted, THEME.font.small.size)
+      // 按钮
+      r.drawButton({ x: d.yesBtn.x, y: d.yesBtn.y, w: d.yesBtn.w, h: d.yesBtn.h, text: '确认' }, 'danger')
+      r.drawButton({ x: d.noBtn.x, y: d.noBtn.y, w: d.noBtn.w, h: d.noBtn.h, text: '取消' }, 'secondary')
     }
 
     // 重置成功提示

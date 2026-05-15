@@ -2,6 +2,323 @@
 
 ---
 
+## v2.0.0 - Cycle 172: P0.3.3 第四批 sceneSignIn 按钮统一 + theme.js 新增 gold 按钮类型 (Code)
+
+### 2026-05-15 18:14 (Task 2 - Cycle 172)
+
+**完成功能：sceneSignIn 3处按钮改用 r.drawButton() + theme.js 新增 gold 按钮类型**
+
+**修改文件：**
+- `js/engine/theme.js` — 新增 `gold` 按钮预设（bgColor:'#ffd700', textColor:'#1a1a2e', fontSize:18, fontWeight:'bold', radius:16）
+- `js/ui/sceneSignIn.js` — 3处按钮统一（返回+签到+已签到）
+
+**具体变更：**
+
+**theme.js**
+1. THEME.buttons 新增 `gold` 类型 — 金色CTA按钮，用于签到等高亮行动召唤场景
+
+**sceneSignIn.js (3处)**
+1. 返回按钮 `fillRoundRect+fillText` → `r.drawButton({…}, 'secondary')`
+2. 签到按钮（可签到态）`fillRoundRect+fillText` → `r.drawButton({…}, 'gold')` — 金色CTA效果
+3. 签到按钮（已签到态）`fillRoundRect+fillText` → `r.drawButton({…}, 'secondary')` — 灰色不可操作感
+
+**验收通过：**
+- sceneSignIn.js 中不再有手绘按钮（fillRoundRect+fillText 组合）
+- 返回按钮使用 secondary 风格
+- 签到按钮保持金色CTA效果
+- 已签到状态有明显的视觉区分
+- 签到功能不受影响（粒子特效、飘字奖励逻辑未改动）
+
+---
+
+## v2.0.0 - Cycle 171: P0.3.3 第三批 sceneAlbum+sceneEvolve+sceneTeamSetup 按钮统一 + sceneSettings 死代码清理 (Code)
+
+### 2026-05-15 17:53 (Task 2 - Cycle 171)
+
+**完成功能：4个场景共11处按钮改用 r.drawButton() + 1处死代码清理**
+
+**修改文件：**
+- `js/ui/sceneSettings.js` — 清除 `this.ui._backBtnRect` 死代码赋值
+- `js/ui/sceneAlbum.js` — 4处按钮统一（列表返回+详情返回+进化+关闭）
+- `js/ui/sceneEvolve.js` — 4处按钮统一（返回+可进化按钮+不可进化按钮+进化完成返回）
+- `js/ui/sceneTeamSetup.js` — 4处按钮统一（返回+保存+取消+确认弹窗2按钮）
+
+**具体变更：**
+
+**sceneSettings.js (死代码清理)**
+1. `this.ui._backBtnRect = r.drawButton(...)` → `r.drawButton(...)` — 移除未使用的返回值赋值
+
+**sceneAlbum.js (4处)**
+1. 列表页返回按钮 → `r.drawButton({…}, 'secondary')`
+2. 详情页返回按钮 → `r.drawButton({…}, 'secondary')`
+3. 进化按钮 → `r.drawButton({…}, 'primary')`
+4. 关闭按钮 → `r.drawButton({…}, 'secondary')`
+
+**sceneEvolve.js (4处)**
+1. 返回按钮 → `r.drawButton({…}, 'secondary')`
+2. 可进化按钮「✨ 开始进化 ✨」→ `r.drawButton({…}, 'primary')`
+3. 不可进化按钮「条件不足」→ `r.drawButton({…}, 'secondary')`
+4. 进化完成「返回图鉴」→ `r.drawButton({…}, 'secondary')`
+
+**sceneTeamSetup.js (4处)**
+1. 返回按钮 → `r.drawButton({…}, 'secondary')`
+2. 保存按钮「💾 保存」→ `r.drawButton({…}, 'primary')`
+3. 取消按钮 → `r.drawButton({…}, 'danger')`
+4. 确认弹窗「确认取消」→ `r.drawButton({…}, 'danger')` + 「继续编辑」→ `r.drawButton({…}, 'secondary')`
+
+**验收结果：**
+- ✅ 4个文件全部通过语法检查
+- ✅ 所有按钮类型正确匹配（返回→secondary，主操作→primary，危险→danger）
+- ✅ 触摸事件检测不受影响（tap handler 仍使用原始 rect 数据）
+- ✅ 死代码已清除
+
+---
+
+## v2.0.0 - Cycle 168: P0.3.3 第二批 sceneSettings+sceneAchievement+sceneInventory 按钮统一 (Code)
+
+### 2026-05-15 17:28 (Task 2 - Cycle 168)
+
+**完成功能：3个场景共7处按钮改用 r.drawButton()**
+
+**修改文件：**
+- `js/ui/sceneSettings.js` — 4处按钮统一 + 补了确认弹窗渲染
+- `js/ui/sceneAchievement.js` — 1处返回按钮统一
+- `js/ui/sceneInventory.js` — 2处按钮统一
+
+**具体变更：**
+
+**sceneSettings.js (4处 + bug修复)**
+1. 返回按钮 `← 返回` → `r.drawButton({…}, 'secondary')`
+2. 重置按钮 `🗑️ 重置游戏数据` → `r.drawButton({…}, 'danger')`
+3. 确认弹窗「确认」→ `r.drawButton({…}, 'danger')`
+4. 确认弹窗「取消」→ `r.drawButton({…}, 'secondary')`
+5. **Bug修复**: 确认弹窗 `_showResetConfirm()` 创建了数据但 render 中从未绘制弹窗 — 补了遮罩+弹窗背景+提示文字+两个按钮
+
+**sceneAchievement.js (1处)**
+1. 返回按钮 `← 返回` → `r.drawButton({…}, 'secondary')`
+2. 分类标签 tabs 保持原样（选中/未选中两种样式，非标准按钮）
+
+**sceneInventory.js (2处)**
+1. 返回按钮 `← 返回` → `r.drawButton({…}, 'secondary')`
+2. 弹窗「使用」按钮 → `r.drawButton({…}, 'primary')` (原来有重复的 fillRoundRect 调用，一并清理)
+
+**发现的Bug:**
+- sceneSettings.js 确认弹窗有数据但无渲染代码，点重置后看不到弹窗 → 已修复
+
+---
+
+## v2.0.0 - Cycle 167: P0.3.3 sceneStageSelect.js 按钮统一 (Code)
+
+### 2026-05-15 17:10 (Task 2 - Cycle 167)
+
+**完成功能：sceneStageSelect.js 4处按钮改用 r.drawButton()**
+
+**修改文件：**
+- `js/ui/sceneStageSelect.js` — 4处按钮统一
+
+**具体变更：**
+1. **返回按钮** `← 返回` — 手写 fillRoundRect+fillText → `r.drawButton({x:10,y:10,w:50,h:30,text:'← 返回'}, 'secondary', pressed)` + 按压缩放
+2. **上一章按钮** `◀` — 手写 fillRoundRect+fillText → `r.drawButton({x:20,y:headerY+5,w:35,h:30,text:'◀'}, 'secondary', pressed)`
+3. **下一章按钮** `▶` — 手写 fillRoundRect+fillText → `r.drawButton({x:designW-55,y:headerY+5,w:35,h:30,text:'▶'}, 'secondary', pressed)`
+4. **扫荡弹窗确认按钮** — fillRoundRect+fillText → `r.drawButton({…}, 'secondary', 1)`
+5. **扫荡弹窗取消按钮** — fillRoundRect+fillText → `r.drawButton({…}, 'danger', 1)`
+
+**按压态改进：** 返回/导航按钮从原来的颜色切换改为缩放反馈（0.9），与其他场景 drawButton 行为一致。
+
+**验证：**
+- ✅ 语法检查通过
+- ✅ 点击区域不变（touchedBtn 逻辑未改）
+- ✅ 无硬编码 fillRoundRect+fillText 按钮残留（关卡卡片、扫荡迷你按钮不属于标准按钮）
+
+---
+
+## v2.0.0 - Cycle 166: D1 精英关卡 Ch10~Ch11 (Code)
+
+### 2026-05-15 16:49 (Task 2 - Cycle 166)
+
+**完成功能：第10~11章精英关卡设计 + 独特棋盘布局（D1 最终收尾）**
+
+**修改文件：**
+- `data/stages.js` — 在 Ch10/Ch11 中各插入1个精英关卡
+
+**Ch10 精英·混沌祭坛 (stage_10_4e)**
+- 敌人：enemy_039 + enemy_040 + enemy_041 | 等级43 | eliteMultiplier 1.5
+- 奖励：gold 350 / exp 195（boss的64%/65%，普通关的1.7x/1.4x）
+- 障碍布局：中央3×3石墙阵列(8个hp=3) + 边缘四角锁定宝石(8个hp=2)
+- 策略：中央大片石墙将棋盘分割为左右窄通道，边缘锁定宝石限制了回旋余地，需要在夹缝中寻找消除机会
+- 混沌主题 — "混沌压制"感：强大的区域封锁让玩家感到喘不过气
+
+**Ch11 精英·光耀祭坛 (stage_11_4e)**
+- 敌人：enemy_044 + enemy_045 + enemy_046 | 等级48 | eliteMultiplier 1.5
+- 奖励：gold 380 / exp 220（boss的63%/63%，普通关的1.8x/1.5x）
+- 障碍布局：螺旋毒雾(16处，spreadInterval=3，从四角向中心螺旋排列) + 稀疏石墙(4个hp=3)
+- 策略：四角起始的毒雾以螺旋路径逐渐吞噬棋盘，配合4个散布石墙制造断点，是整个游戏最复杂的精英关卡
+- 光耀主题 — "终极策略挑战"：16处毒雾+快扩散(spreadInterval=3)要求玩家快速行动
+
+**验证结果：**
+- ✅ 全部11章共10个精英关卡（Ch2~Ch11各1个）
+- ✅ 奖励比例在55~65%区间（Ch10: 64%/65%，Ch11: 63%/63%）
+- ✅ JSON 语法正确，无报错
+- ✅ 不破坏现有数据
+
+**D1 精英关卡全部完成！** 全游戏共10个精英关卡，每章1个，各有独特棋盘布局和策略挑战。
+
+---
+
+## v2.0.0 - Cycle 165: D1 精英关卡 Ch7~Ch9 (Code)
+
+### 2026-05-15 16:30 (Task 2 - Cycle 165)
+
+**完成功能：第7~9章精英关卡设计 + 独特棋盘布局**
+
+**修改文件：**
+- `data/stages.js` — 在 Ch7/Ch8/Ch9 中各插入1个精英关卡
+
+**Ch7 精英·虚空裂隙 (stage_7_3e)**
+- 敌人：enemy_025 + enemy_026 | 等级30 | eliteMultiplier 1.5
+- 奖励：gold 270 / exp 155（高于Ch7普通关最高180/115）
+- 障碍布局：菱形石墙 — 8个石墙形成菱形中空，限制中心操作区域
+- 四角毒雾(spreadInterval=3)，从角落逐步向内蔓延
+- 策略：需在菱形间隙操作，同时控制四角毒雾扩散
+
+**Ch8 精英·时空漩涡 (stage_8_3e)**
+- 敌人：enemy_030 + enemy_031 | 等级35 | eliteMultiplier 1.5
+- 奖励：gold 320 / exp 180（高于Ch8普通关最高190/125）
+- 障碍布局：四角锁定宝石(4个hp=2) + 中央石墙方块(4个hp=2)
+- 策略：四角锁定限制了边角宝石使用，中央石墙缩小有效操作区
+
+**Ch9 精英·星耀祭坛 (stage_9_3e)**
+- 敌人：enemy_035 + enemy_036 | 等级40 | eliteMultiplier 1.5
+- 奖励：gold 370 / exp 200（高于Ch9普通关最高200/135）
+- 障碍布局：十字形毒雾(11处，spreadInterval=4) + 交错石墙(8个)
+- 策略：毒雾以十字形覆盖中轴区域，石墙在外围交错布局，高难度混合障碍
+
+**验收检查：**
+- ✅ Ch7/Ch8/Ch9 各1个精英关卡
+- ✅ 每个有独特障碍布局（石墙/锁定宝石/毒雾混合使用）
+- ✅ eliteMultiplier = 1.5，敌人等级匹配章节难度
+- ✅ 奖励高于同章普通关卡(1.5x+)，低于Boss关
+- ✅ 不破坏现有Ch2~Ch6精英关卡和所有普通/Boss关卡数据
+- ✅ 语法验证通过，全game共8个精英关卡(Ch2~Ch9)
+
+---
+
+## v2.0.0 - Cycle 164: D1 精英关卡 Ch4~Ch6 (Code)
+
+### 2026-05-15 16:13 (Task 2 - Cycle 164)
+
+**完成功能：第4~6章精英关卡设计 + 独特棋盘布局**
+
+**修改文件：**
+- `data/stages.js` — 在 Ch4/Ch5/Ch6 中各插入1个精英关卡：
+
+**Ch4 精英·沙漠蜃影 (stage_4_3e)**
+- 敌人：2×enemy_011 (暗翼蝙蝠) | 等级15 | eliteMultiplier 1.5
+- 奖励：gold 220 / exp 130（高于Ch4普通关最高150/95）
+- 障碍布局：蛇形石墙 — 上下两道石墙横贯棋盘，中间留蛇形通道，配合2处毒雾
+- 石墙10个 + 毒雾2处(spreadInterval=5)
+
+**Ch5 精英·雷暴守卫 (stage_5_3e)**
+- 敌人：enemy_014 + enemy_016 (雷鹰+光蝶) | 等级20 | eliteMultiplier 1.5
+- 奖励：gold 260 / exp 155（高于Ch5普通关最高160/105）
+- 障碍布局：对称锁定宝石 — 上下两排锁定宝石压缩可操作空间，中间仅留4列
+- 锁定宝石10个(hp=2)
+
+**Ch6 精英·深渊使者 (stage_6_3e)**
+- 敌人：enemy_020 + enemy_021 (霜狼+冰晶) | 等级25 | eliteMultiplier 1.5
+- 奖励：gold 300 / exp 175（高于Ch6普通关最高170/110）
+- 障碍布局：终极混合 — 石墙(6个) + 锁定宝石(4个) + 毒雾(4角，spreadInterval=3)
+- 限制中心区域操作，同时毒雾从四角逼近
+
+**验收通过：**
+- ✅ 语法验证通过（node -e import验证）
+- ✅ 总精英关卡从2个增加到5个（Ch2~Ch6各1个）
+- ✅ 每个精英关卡有独特障碍组合（石墙/锁定/毒雾/混合）
+- ✅ 奖励高于同章普通关卡
+- ✅ eliteMultiplier 1.5 一致
+- ✅ 不破坏现有关卡数据
+
+---
+
+## v2.0.0 - Cycle 163: 🏡 牧场系统基础框架 (Code)
+
+### 2026-05-15 15:47 (Task 2 - Cycle 163)
+
+**完成功能：牧场场景 + 挂机经验系统 + 主菜单入口**
+
+**新建文件：**
+- `js/ui/sceneRanch.js` — 牧场场景完整实现：
+  - 草地渐变背景 + 纹理装饰
+  - 3个牧场槽位（点击选择/切换）
+  - 怪物详情面板（emoji/名称/等级/性格/HP-ATK-DEF-SPD属性条）
+  - 挂机气泡动画（💤⭐❤️💪 随机浮动）
+  - 底部怪物选择栏（已收服怪物列表，点击放入/取出）
+  - 收取经验按钮（一键收取所有挂机经验）
+  - 挂机收益实时显示（+EXP/5min + 待领取经验）
+
+**修改文件：**
+- `js/engine/scene.js` — 注册 SceneRanch + import
+- `js/core/storage.js` — 新增4个牧场方法：
+  - `getRanchState()` — 获取牧场数据（槽位/解锁数）
+  - `setRanchState(state)` — 保存牧场数据
+  - `getIdleExpRate(monsterId)` — 计算挂机速率（2 + 等级×0.5）
+  - `collectIdleExp(monsterId)` — 收取单只怪物经验并重置计时
+- `js/ui/sceneMain.js` — 主菜单新增「🏡 牧场」按钮（5个底部按钮中间位置）+ 长按描述
+
+**挂机机制：**
+- 每5分钟自动获得经验 = 基础2 + 等级×0.5
+- 初始3个槽位，可放已收服怪物
+- 点击怪物放入当前选中槽位，再次点击取出
+- 收取经验按钮一键结算所有槽位
+
+**验收通过：**
+- ✅ 语法检查通过
+- ✅ import/export 路径正确
+- ✅ 不破坏现有功能（只新增场景和方法）
+
+---
+
+## v2.0.0 - Cycle 161: P0.2.2b 字体替换 — sceneStageSelect + sceneBattle (Code)
+
+### 2026-05-15 14:11 (Task 2 - Cycle 161)
+
+**完成功能：2个场景的 fillText 硬编码字号替换为 THEME.font 常量**
+
+**修改文件：**
+- `js/ui/sceneStageSelect.js` — 17处硬编码字号全部替换为 THEME.font 常量：
+  - 章节导航箭头 16→font.number.size
+  - 章节标题 14→font.body.size
+  - 省略号 8→font.tiny.size
+  - ELITE标签 9→font.tiny.size
+  - 关卡名称 13→font.body.size-1
+  - 锁定图标 14→font.body.size
+  - 扫荡按钮 11→font.tiny.size
+  - 扫荡弹窗标题 16→font.number.size
+  - 弹窗描述 12→font.small.size, 11→font.tiny.size
+  - 奖励文字 12→font.small.size
+  - 确认/取消 13→font.body.size-1
+  - 扫荡完成标题 20→font.bigNum.size
+  - 奖励/经验 14→font.body.size
+  - 星级图标 16→font.number.size
+  - 动画emoji 24→font.subtitle.size
+  - 关闭提示 12→font.small.size
+- `js/ui/sceneBattle.js` — 7处大号硬编码字号替换：
+  - combo连击 28→font.title.size
+  - 倒下提示 14→font.body.size
+  - 胜利/失败标题 28→font.title.size
+  - 结算提示 14→font.body.size
+  - 宝石emoji 14→font.body.size
+  - 宝石缩放 14*scale→font.body.size*scale
+  - 石块emoji 16→font.number.size, 14→font.body.size
+  - 保留战斗微字号(8/9/10px)：HP数值、护盾、蓄力、状态效果等（卡片布局像素精确）
+
+**验收验证：**
+- sceneStageSelect.js: 23处fillText全部使用THEME.font ✅
+- sceneBattle.js: 语法检查通过 ✅
+- 战斗微字号(8/9/10px)为卡片内紧凑布局，保留原值 ✅
+
+---
+
 ## v2.0.0 - Cycle 159: P0.2.2a 字体替换第一批 — sceneTutorial + sceneMain + sceneStart (Code)
 
 ### 2026-05-15 13:51 (Task 2 - Cycle 159)

@@ -169,6 +169,14 @@ export const THEME = {
       radius:    8,
       pressScale:0.95,
     },
+    gold: {
+      bgColor:   '#ffd700',
+      textColor: '#1a1a2e',
+      fontSize:  18,
+      fontWeight:'bold',
+      radius:    16,
+      pressScale:0.95,
+    },
   },
 
   // === 动画时长 (秒) ===

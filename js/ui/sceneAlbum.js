@@ -217,18 +217,17 @@ export class SceneAlbum {
     r.fillRect(0, 0, this.designW, this.designH, COLORS.bgMedium)
 
     // 标题
-    r.fillText('📖 怪物图鉴', this.designW / 2, 40, COLORS.textPrimary, 18, 'bold')
+    r.fillText('📖 怪物图鉴', this.designW / 2, 40, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
 
     // 返回按钮
-    r.fillRoundRect(this.backBtn.x, this.backBtn.y, this.backBtn.w, this.backBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('← 返回', this.backBtn.x + this.backBtn.w / 2, this.backBtn.y + 20, COLORS.textPrimary, 12)
+    r.drawButton({ x: this.backBtn.x, y: this.backBtn.y, w: this.backBtn.w, h: this.backBtn.h, text: '← 返回' }, 'secondary')
 
     const player = this.game.storage.loadPlayer()
     const captured = player.captured || []
     const totalMonsters = this.monsters.length
     const unlockedCount = captured.length
 
-    r.fillText(`已收集: ${unlockedCount}/${totalMonsters}`, this.designW / 2, 62, COLORS.textMuted, 11)
+    r.fillText(`已收集: ${unlockedCount}/${totalMonsters}`, this.designW / 2, 62, COLORS.textMuted, THEME.font.tiny.size)
 
     // 绘制属性筛选标签
     const filterY = 65
@@ -245,11 +244,11 @@ export class SceneAlbum {
 
       if (isSelected) {
         r.fillRoundRect(currentX, filterY, btnW, filterH, THEME.radius.sm - 2, color)
-        r.fillText(label, currentX + btnW / 2, filterY + 16, COLORS.textPrimary, 10, 'bold')
+        r.fillText(label, currentX + btnW / 2, filterY + 16, COLORS.textPrimary, THEME.font.tiny.size, 'bold')
       } else {
         r.fillRoundRect(currentX, filterY, btnW, filterH, THEME.radius.sm - 2, COLORS.disabledBg)
         r.strokeRect(currentX, filterY, btnW, filterH, 1, color)
-        r.fillText(label, currentX + btnW / 2, filterY + 16, color, 10)
+        r.fillText(label, currentX + btnW / 2, filterY + 16, color, THEME.font.tiny.size)
       }
       currentX += btnW + filterGap
     }
@@ -284,22 +283,22 @@ export class SceneAlbum {
 
       // Emoji / 锁定图标
       if (isUnlocked) {
-        r.fillText(monster.emoji, x + this.itemW / 2, y + 38, COLORS.textPrimary, 28)
+        r.fillText(monster.emoji, x + this.itemW / 2, y + 38, COLORS.textPrimary, THEME.font.icon.size)
         // 名字
-        r.fillText(monster.name, x + this.itemW / 2, y + 62, COLORS.textPrimary, 10, 'bold')
+        r.fillText(monster.name, x + this.itemW / 2, y + 62, COLORS.textPrimary, THEME.font.tiny.size, 'bold')
         // 稀有度星星
         const stars = this._getRarityStars(monster.rarity)
-        r.fillText(stars, x + this.itemW / 2, y + 76, COLORS.gold, 9)
+        r.fillText(stars, x + this.itemW / 2, y + 76, COLORS.gold, THEME.font.tiny.size)
       } else {
-        r.fillText('🔒', x + this.itemW / 2, y + 38, COLORS.textMuted, 24)
-        r.fillText('???', x + this.itemW / 2, y + 62, COLORS.textDark, 10)
-        r.fillText('???', x + this.itemW / 2, y + 76, COLORS.textDark, 9)
+        r.fillText('🔒', x + this.itemW / 2, y + 38, COLORS.textMuted, THEME.font.icon.size)
+        r.fillText('???', x + this.itemW / 2, y + 62, COLORS.textDark, THEME.font.tiny.size)
+        r.fillText('???', x + this.itemW / 2, y + 76, COLORS.textDark, THEME.font.tiny.size)
       }
 
       // 显示属性标签
       const tagColor = THEME.colors.elementColors[monster.element]
       r.fillRoundRect(x + 4, y + 4, 30, 16, THEME.radius.sm - 2, tagColor)
-      r.fillText(this.elementNames[monster.element], x + 19, y + 15, COLORS.textPrimary, 9)
+      r.fillText(this.elementNames[monster.element], x + 19, y + 15, COLORS.textPrimary, THEME.font.tiny.size)
 
       col++
       if (col >= this.cols) { col = 0; row++ }
@@ -318,11 +317,10 @@ export class SceneAlbum {
     r.fillRect(0, 0, this.designW, this.designH, COLORS.bgMedium)
 
     // 标题
-    r.fillText('📖 怪物图鉴', this.designW / 2, 40, COLORS.textPrimary, 18, 'bold')
+    r.fillText('📖 怪物图鉴', this.designW / 2, 40, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
 
     // 返回按钮
-    r.fillRoundRect(this.backBtn.x, this.backBtn.y, this.backBtn.w, this.backBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('← 返回', this.backBtn.x + this.backBtn.w / 2, this.backBtn.y + 20, COLORS.textPrimary, 12)
+    r.drawButton({ x: this.backBtn.x, y: this.backBtn.y, w: this.backBtn.w, h: this.backBtn.h, text: '← 返回' }, 'secondary')
 
     const m = this.selectedMonster
     const player = this.game.storage.loadPlayer()
@@ -338,17 +336,17 @@ export class SceneAlbum {
     r.strokeRect(cardX, cardY, cardW, cardH, 2, THEME.colors.elementColors[m.element])
 
     // Emoji
-    r.fillText(m.emoji, this.designW / 2, cardY + 55, COLORS.textPrimary, 48)
+    r.fillText(m.emoji, this.designW / 2, cardY + 55, COLORS.textPrimary, THEME.font.display.size)
 
     // 名字
-    r.fillText(m.name, this.designW / 2, cardY + 95, COLORS.textPrimary, 16, 'bold')
+    r.fillText(m.name, this.designW / 2, cardY + 95, COLORS.textPrimary, THEME.font.number.size, THEME.font.number.weight)
 
     // 稀有度星星
-    r.fillText(this._getRarityStars(m.rarity), this.designW / 2, cardY + 115, COLORS.gold, 12)
+    r.fillText(this._getRarityStars(m.rarity), this.designW / 2, cardY + 115, COLORS.gold, THEME.font.small.size)
 
     // 属性标签
     r.fillRoundRect(this.designW / 2 - 25, cardY + 125, 50, 22, THEME.radius.md - 2, THEME.colors.elementColors[m.element])
-    r.fillText(this.elementNames[m.element], this.designW / 2, cardY + 140, COLORS.textPrimary, 12, 'bold')
+    r.fillText(this.elementNames[m.element], this.designW / 2, cardY + 140, COLORS.textPrimary, THEME.font.small.size, THEME.font.small.weight)
 
     // 分割线
     r.fillRect(cardX + 20, cardY + 160, cardW - 40, 1, COLORS.disabledBg)
@@ -358,31 +356,31 @@ export class SceneAlbum {
     const col1X = cardX + 30
     const col2X = cardX + cardW - 80
 
-    r.fillText('HP', col1X, statsY, COLORS.textMuted, 11)
-    r.fillText(`${m.baseHP}`, col2X, statsY, COLORS.statHp, 11)
+    r.fillText('HP', col1X, statsY, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(`${m.baseHP}`, col2X, statsY, COLORS.statHp, THEME.font.tiny.size)
 
-    r.fillText('ATK', col1X, statsY + 22, COLORS.textMuted, 11)
-    r.fillText(`${m.baseATK}`, col2X, statsY + 22, COLORS.statAtk, 11)
+    r.fillText('ATK', col1X, statsY + 22, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(`${m.baseATK}`, col2X, statsY + 22, COLORS.statAtk, THEME.font.tiny.size)
 
-    r.fillText('DEF', col1X, statsY + 44, COLORS.textMuted, 11)
-    r.fillText(`${m.baseDEF}`, col2X, statsY + 44, COLORS.statDef, 11)
+    r.fillText('DEF', col1X, statsY + 44, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(`${m.baseDEF}`, col2X, statsY + 44, COLORS.statDef, THEME.font.tiny.size)
 
-    r.fillText('SPD', col1X, statsY + 66, COLORS.textMuted, 11)
-    r.fillText(`${m.baseSPD}`, col2X, statsY + 66, COLORS.statSpd, 11)
+    r.fillText('SPD', col1X, statsY + 66, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(`${m.baseSPD}`, col2X, statsY + 66, COLORS.statSpd, THEME.font.tiny.size)
 
     // 技能信息
     r.fillRect(cardX + 20, statsY + 95, cardW - 40, 1, COLORS.disabledBg)
 
-    r.fillText('技能', this.designW / 2, statsY + 118, COLORS.textMuted, 11)
-    r.fillText(m.skill.name, this.designW / 2, statsY + 138, COLORS.textPrimary, 13, 'bold')
-    r.fillText(`消耗: ${m.skill.cost} 能量 | 倍率: ${m.skill.multiplier}x`, this.designW / 2, statsY + 158, COLORS.textSecondary, 10)
+    r.fillText('技能', this.designW / 2, statsY + 118, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(m.skill.name, this.designW / 2, statsY + 138, COLORS.textPrimary, THEME.font.small.size, 'bold')
+    r.fillText(`消耗: ${m.skill.cost} 能量 | 倍率: ${m.skill.multiplier}x`, this.designW / 2, statsY + 158, COLORS.textSecondary, THEME.font.tiny.size)
 
     // 收服状态
     const statusY = cardY + cardH + 20
     if (isCaptured) {
-      r.fillText('✅ 已收服', this.designW / 2, statusY, COLORS.success, 13)
+      r.fillText('✅ 已收服', this.designW / 2, statusY, COLORS.success, THEME.font.small.size)
     } else {
-      r.fillText('❓ 未收服', this.designW / 2, statusY, COLORS.textMuted, 13)
+      r.fillText('❓ 未收服', this.designW / 2, statusY, COLORS.textMuted, THEME.font.small.size)
     }
 
     // 进化按钮（仅已收服且可进化的怪物）
@@ -390,8 +388,7 @@ export class SceneAlbum {
     const evolveBtn = { x: this.designW / 2 - 60, y: statusY + 35, w: 120, h: 40 }
 
     if (hasEvolution && isCaptured) {
-      r.fillRoundRect(evolveBtn.x, evolveBtn.y, evolveBtn.w, evolveBtn.h, THEME.radius.md, COLORS.evolveBg)
-      r.fillText('🔄 进化', this.designW / 2, statusY + 60, COLORS.textPrimary, 14, 'bold')
+      r.drawButton({ x: evolveBtn.x, y: evolveBtn.y, w: evolveBtn.w, h: evolveBtn.h, text: '🔄 进化' }, 'primary')
       this.evolveBtn = evolveBtn
     } else {
       this.evolveBtn = null
@@ -399,8 +396,7 @@ export class SceneAlbum {
 
     // 关闭按钮
     const closeBtn = { x: this.designW / 2 - 60, y: statusY + 85, w: 120, h: 40 }
-    r.fillRoundRect(closeBtn.x, closeBtn.y, closeBtn.w, closeBtn.h, THEME.radius.md, THEME.buttons.secondary.bgColor)
-    r.fillText('关闭', this.designW / 2, statusY + 110, COLORS.textPrimary, 14)
+    r.drawButton({ x: closeBtn.x, y: closeBtn.y, w: closeBtn.w, h: closeBtn.h, text: '关闭' }, 'secondary')
 
     // 点击关闭按钮也可返回
     this.closeBtn = closeBtn

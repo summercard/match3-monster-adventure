@@ -461,7 +461,7 @@ export class SceneResult {
     r.fillRect(0, 0, this.designW, this.designH, THEME.colors.bgMedium)
 
     // 标题
-    r.fillText(this.isWin ? '🎉 战斗胜利!' : '💀 战斗失败', this.designW / 2, 40, COLORS.textPrimary, 22)
+    r.fillText(this.isWin ? '🎉 战斗胜利!' : '💀 战斗失败', this.designW / 2, 40, COLORS.textPrimary, THEME.font.title.size)
 
     // 星级评价
     const starY = 85
@@ -527,7 +527,7 @@ export class SceneResult {
 
       // 星星发光效果
       if (isLit) {
-        r.fillText('✨', x - 5, y, 'rgba(255, 215, 0, 0.3)', 40)
+        r.fillText('✨', x - 5, y, 'rgba(255, 215, 0, 0.3)', THEME.font.display.size)
       }
 
       const starEmoji = isLit ? '⭐' : '☆'
@@ -541,21 +541,21 @@ export class SceneResult {
 
     r.fillRoundRect(20, y, this.designW - 40, 90, THEME.radius.md, COLORS.bgCard)
 
-    r.fillText('战斗信息', this.designW / 2, y + 20, COLORS.textPrimary, 14)
+    r.fillText('战斗信息', this.designW / 2, y + 20, COLORS.textPrimary, THEME.font.body.size)
 
-    r.fillText(`回合: ${result.turnCount}`, 40, y + 45, COLORS.textPrimary, 12)
-    r.fillText(`最大回合: ${result.maxTurns}`, 200, y + 45, COLORS.textMuted, 11)
+    r.fillText(`回合: ${result.turnCount}`, 40, y + 45, COLORS.textPrimary, THEME.font.small.size)
+    r.fillText(`最大回合: ${result.maxTurns}`, 200, y + 45, COLORS.textMuted, THEME.font.tiny.size)
 
     // 击败的怪物
     const defeated = result.enemies.filter(e => e && e.hp <= 0)
     if (defeated.length > 0) {
-      r.fillText(`击败: ${defeated.map(e => e.emoji).join(' ')}`, 40, y + 70, COLORS.dangerLight, 11)
+      r.fillText(`击败: ${defeated.map(e => e.emoji).join(' ')}`, 40, y + 70, COLORS.dangerLight, THEME.font.tiny.size)
     }
 
     // 存活的怪物
     const alive = result.enemies.filter(e => e && e.hp > 0)
     if (alive.length > 0) {
-      r.fillText(`存活: ${alive.map(e => e.emoji).join(' ')}`, 200, y + 70, COLORS.primarySoft, 11)
+      r.fillText(`存活: ${alive.map(e => e.emoji).join(' ')}`, 200, y + 70, COLORS.primarySoft, THEME.font.tiny.size)
     }
   }
 
@@ -567,13 +567,13 @@ export class SceneResult {
 
     r.fillRoundRect(20, y, this.designW - 40, 82, THEME.radius.md, COLORS.bgPanel)
 
-    r.fillText(capture.title, this.designW / 2, y + 25, COLORS.success, 16)
+    r.fillText(capture.title, this.designW / 2, y + 25, COLORS.success, THEME.font.number.size)
 
     const targetLine = this.captureTarget ? `目标: ${this.captureTarget.name}` : ''
     const itemLine = this.captureItemUsed ? `消耗: ${this.captureItemUsed.name}` : ''
     const lines = [targetLine, itemLine, ...capture.desc.split('\n')].filter(Boolean).slice(0, 3)
     lines.forEach((line, i) => {
-      r.fillText(line, this.designW / 2, y + 48 + i * 14, COLORS.textSecondary, 10)
+      r.fillText(line, this.designW / 2, y + 48 + i * 14, COLORS.textSecondary, THEME.font.tiny.size)
     })
   }
 
@@ -583,23 +583,23 @@ export class SceneResult {
 
     r.fillRoundRect(20, y, this.designW - 40, 100, THEME.radius.md, THEME.colors.bgPanel)
 
-    r.fillText('获得奖励', this.designW / 2, y + 18, COLORS.textPrimary, 14)
+    r.fillText('获得奖励', this.designW / 2, y + 18, COLORS.textPrimary, THEME.font.body.size)
 
     // 金币动画
     const goldBounce = Math.sin(progress * Math.PI * 2) * 5 * (1 - progress)
-    r.fillText('💰', 50, y + 52 + goldBounce, COLORS.gold, 20)
-    r.fillText(`+${this.rewards.gold} 金币`, 75, y + 55, COLORS.gold, 14)
+    r.fillText('💰', 50, y + 52 + goldBounce, COLORS.gold, THEME.font.bigNum.size)
+    r.fillText(`+${this.rewards.gold} 金币`, 75, y + 55, COLORS.gold, THEME.font.body.size)
 
     // 道具动画（闪光）
     if (this.rewards.item) {
       const itemSparkle = Math.sin(progress * Math.PI * 4) * 0.5 + 0.5
       const itemData = ITEMS_DB[this.rewards.item]
       if (itemData) {
-        r.fillText(itemData.emoji, 50, y + 82, `rgba(255, 255, 255, ${0.5 + itemSparkle * 0.5})`, 18)
-        r.fillText(`+1 ${itemData.name}`, 75, y + 85, COLORS.textPrimary, 13)
+        r.fillText(itemData.emoji, 50, y + 82, `rgba(255, 255, 255, ${0.5 + itemSparkle * 0.5})`, THEME.font.subtitle.size)
+        r.fillText(`+1 ${itemData.name}`, 75, y + 85, COLORS.textPrimary, THEME.font.small.size)
       }
     } else {
-      r.fillText('(无道具)', 75, y + 85, COLORS.textMuted, 12)
+      r.fillText('(无道具)', 75, y + 85, COLORS.textMuted, THEME.font.small.size)
     }
   }
 
@@ -609,20 +609,20 @@ export class SceneResult {
 
     r.fillRoundRect(20, y, this.designW - 40, 80, THEME.radius.md, COLORS.bgCard)
 
-    r.fillText('获得经验', this.designW / 2, y + 20, COLORS.textPrimary, 14)
+    r.fillText('获得经验', this.designW / 2, y + 20, COLORS.textPrimary, THEME.font.body.size)
 
-    r.fillText(`+${this.rewards.exp} 经验`, this.designW / 2, y + 48, COLORS.thunder, 16)
+    r.fillText(`+${this.rewards.exp} 经验`, this.designW / 2, y + 48, COLORS.thunder, THEME.font.number.size)
 
     // 显示来源：关卡配置 or 默认
     const stageRewards = result.stageRewards
     if (stageRewards && stageRewards.exp !== undefined) {
       const starMultipliers = [0, 0.6, 0.8, 1.0, 1.2, 1.5]
       const mult = starMultipliers[this.stars] || 1.0
-      r.fillText(`(关卡基础 ${stageRewards.exp} × ${mult}x 星级系数)`, this.designW / 2, y + 70, COLORS.textMuted, 10)
+      r.fillText(`(关卡基础 ${stageRewards.exp} × ${mult}x 星级系数)`, this.designW / 2, y + 70, COLORS.textMuted, THEME.font.tiny.size)
     } else {
       const baseExp = this.isWin ? 100 : 30
       const starBonus = this.stars * 20
-      r.fillText(`(基础 ${baseExp} + 星级加成 ${starBonus})`, this.designW / 2, y + 70, COLORS.textMuted, 10)
+      r.fillText(`(基础 ${baseExp} + 星级加成 ${starBonus})`, this.designW / 2, y + 70, COLORS.textMuted, THEME.font.tiny.size)
     }
   }
 
@@ -660,7 +660,7 @@ export class SceneResult {
 
     const textX = btn.x + btn.w / 2
     const textY = btn.y + btn.h / 2 + 5
-    r.fillText(text, textX, textY, COLORS.textPrimary, 15)
+    r.fillText(text, textX, textY, COLORS.textPrimary, THEME.font.body.size)
   }
 
   destroy() {
@@ -686,15 +686,15 @@ export class SceneResult {
       r.fillRoundRect(this.designW / 2 - 120, itemY, 240, 24, 8, `rgba(255, 215, 0, ${0.2 * pulse})`)
 
       // 升级图标
-      r.fillText('⬆️', this.designW / 2 - 100, itemY + 17, `rgba(255, 215, 0, ${pulse})`, 14)
+      r.fillText('⬆️', this.designW / 2 - 100, itemY + 17, `rgba(255, 215, 0, ${pulse})`, THEME.font.body.size)
 
       // 怪物名
       const monsterData = MONSTER_DB[up.monsterId]
       const name = monsterData ? monsterData.name : up.monsterId
-      r.fillText(name, this.designW / 2 - 70, itemY + 17, COLORS.gold, 12, 'bold')
+      r.fillText(name, this.designW / 2 - 70, itemY + 17, COLORS.gold, THEME.font.small.size, 'bold')
 
       // 等级变化
-      r.fillText(`Lv.${up.oldLevel} → Lv.${up.newLevel}`, this.designW / 2 + 50, itemY + 17, COLORS.success, 12, 'bold')
+      r.fillText(`Lv.${up.oldLevel} → Lv.${up.newLevel}`, this.designW / 2 + 50, itemY + 17, COLORS.success, THEME.font.small.size, 'bold')
     }
   }
 
@@ -702,7 +702,7 @@ export class SceneResult {
     // 显示扫荡解锁提示（渐变动画）
     const y = 548
     const pulse = Math.sin(Date.now() / 300) * 0.2 + 0.8
-    r.fillText('⚡ 已解锁扫荡功能！', this.designW / 2, y, `rgba(255, 200, 50, ${pulse})`, 14, 'bold')
+    r.fillText('⚡ 已解锁扫荡功能！', this.designW / 2, y, `rgba(255, 200, 50, ${pulse})`, THEME.font.body.size, 'bold')
   }
 }
 

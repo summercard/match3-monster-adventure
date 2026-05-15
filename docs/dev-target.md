@@ -1,46 +1,61 @@
 # 开发目标
 
 ## 创建时间
-2026-05-15 14:01
+2026-05-15 18:22
 
-## 当前循环：160（Bug 专项检查 — 10倍数轮次）
+## 当前循环：173
 
-## Bug 专项检查结果
+## 已完成功能审视结果
+| 功能 | 功能完整性 | 边界处理 | 用户体验 | 代码质量 | 数据一致性 | 状态 |
+|------|----------|----------|----------|----------|----------|------|
+| P0.3.3 第一批 sceneStageSelect | ✅ | ✅ | ✅ | ✅ | ✅ | 深完成 |
+| P0.3.3 第二批 sceneSettings/Achievement/Inventory | ✅ | ✅ | ✅ | ✅ | ✅ | 深完成 |
+| P0.3.3 第三批 sceneAlbum/Evolve/TeamSetup | ✅ | ✅ | ✅ | ✅ | ✅ | 深完成 |
+| P0.3.3 第四批 sceneSignIn | ✅ | ✅ | ✅ | ✅ | ✅ | 深完成 |
 
-### 检查项目
+## 游戏流程走查
+- ✅ 启动 → 新手引导 → 主菜单 → 各功能页 → 返回 → 全流程通畅
+- ✅ sceneTutorial 引导5步流程完整，跳过/下一步按钮响应正常
+- ✅ sceneShop 商店列表滚动、购买弹窗确认/取消逻辑完整
+- ✅ sceneRanch 槽位管理、怪物选取、挂机收取流程完整
+- ⚠️ 三个场景按钮均未使用 drawButton 统一样式，视觉风格不一致
 
-| 检查项 | 结果 | 说明 |
-|--------|------|------|
-| 语法错误 | ✅ 0 | 全部 32 个 JS 文件 `node -c` 通过 |
-| TODO/FIXME 标记 | ✅ 0 | 无残留 |
-| console.error | ✅ 5处 | 均为合理错误处理日志(storage/eventBus/scene/settings)，非bug |
-| init/destroy 配对 | ✅ | 全部 15 个场景 init/destroy 成对，sceneBattle 有 3 个 init 辅助方法 |
-| 括号匹配 | ✅ | 全部 JS 文件花括号和圆括号匹配正确 |
-| import/export 路径 | ✅ | 所有 import 路径指向存在的文件，export 名称匹配 |
-| 死代码/未调用函数 | ✅ | 无明显死代码 |
-| SCENE_CLASSES 注册 | ✅ | 15 个场景全部注册在 scene.js 的 SCENE_CLASSES 中 |
+## 本次目标
+### 目标类型
+深化已有
 
-### 游戏流程走查
+### 功能名称
+P0.3.3 第五批（最后一批）— sceneTutorial / sceneShop / sceneRanch 按钮统一
 
-```
-启动 → sceneStart → (main/tutorial) ✅
-tutorial → main ✅
-main → stageSelect → battlePrepare → battle → result → stageSelect ✅
-main → teamSetup → main ✅
-main → album → evolve → album → main ✅
-main → shop → main ✅
-main → signIn → main ✅
-main → achievement → main ✅
-main → settings → main ✅
-main → inventory → main ✅
-```
+### 深化重点
+将剩余3个场景的所有按钮改用 `r.drawButton()` 通用方法，完成 P0.3.3 按钮样式统一的最后一步。
 
-- ✅ 所有场景切换路径完整，无死胡同
-- ✅ 所有场景均有返回按钮
-- ✅ 战斗→结算→关卡选择 闭环正常
-- ✅ 结算页有"重试"和"下一关"功能
+### 具体任务
+- [ ] **sceneTutorial.js** — 2处按钮改用 drawButton：
+  - [ ] "跳过"按钮 → drawButton(btn, 'secondary')
+  - [ ] "下一步/开始冒险"按钮 → drawButton(btn, isLast ? 'success' : 'primary')，保留发光效果或改用 drawButton 后加外发光
+- [ ] **sceneShop.js** — 4类按钮改用 drawButton：
+  - [ ] "← 返回"按钮 → drawButton(backBtn, 'secondary')
+  - [ ] 购买按钮（可购买） → drawButton(buyBtn, 'primary')
+  - [ ] 购买按钮（不足） → drawButton(buyBtn, 'secondary') + 灰色文字覆盖
+  - [ ] 弹窗"确认购买"按钮 → drawButton(confirmBtn, 'primary')
+  - [ ] 弹窗"取消"按钮 → drawButton(cancelBtn, 'secondary')
+- [ ] **sceneRanch.js** — _renderBtn 方法改造 + picker按钮：
+  - [ ] 将 _renderBtn 改为调用 r.drawButton()
+  - [ ] "← 返回" → drawButton(backBtn, 'secondary')
+  - [ ] "收取" → drawButton(collectBtn, highlight ? 'gold' : 'secondary')
+  - [ ] picker 怪物按钮保持自定义渲染（非标准按钮，是卡片选择器）不改 drawButton
+- [ ] **theme.js** — 如需新增 'success' 按钮类型（绿色），添加到 THEME.buttons
 
-### 结论
-**全部OK，代码库状态良好，无 bug。**
+### 涉及文件
+- 修改：`js/ui/sceneTutorial.js`
+- 修改：`js/ui/sceneShop.js`
+- 修改：`js/ui/sceneRanch.js`
+- 可能修改：`js/engine/theme.js`（添加 success 按钮类型）
 
-上次检查(Cycle 150)以来代码质量保持良好，新增的字体替换改动没有引入语法问题。
+### 验收标准
+- 三个场景所有标准按钮均使用 drawButton 统一渲染
+- 按钮视觉风格与其他已完成场景（sceneMain/sceneStart/sceneSignIn等）一致
+- 按钮点击响应和功能不受影响
+- P0.3.3 按钮样式统一任务全部完成 ✅
+- 可以进入 P0.4 背景统一阶段

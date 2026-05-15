@@ -238,8 +238,7 @@ export class SceneInventory {
     r.fillRect(0, 0, 375, 60, COLORS.bgCard)
 
     // 返回按钮
-    r.fillRoundRect(this.backBtn.x, this.backBtn.y, this.backBtn.w, this.backBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('← 返回', this.backBtn.x + 10, this.backBtn.y + 23, COLORS.textPrimary, THEME.font.body.size)
+    this._backBtnRect = r.drawButton({ x: this.backBtn.x, y: this.backBtn.y, w: this.backBtn.w, h: this.backBtn.h, text: '← 返回' }, 'secondary')
 
     // 标题
     r.fillText('背包', 187, 35, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
@@ -327,9 +326,7 @@ export class SceneInventory {
       r.fillText(`拥有: ×${p.count}`, p.x + p.w / 2, p.y + 145, COLORS.gold, THEME.font.body.size, THEME.font.body.weight)
 
       // 使用按钮
-      r.fillRoundRect(p.x + (p.w - 120) / 2, p.y + p.h - 60, 120, 40, THEME.radius.md, THEME.buttons.primary.bgColor)
-      r.fillRoundRect(p.x + (p.w - 120) / 2, p.y + p.h - 60, 120, 40, THEME.radius.md, THEME.buttons.primary.bgColor)
-      r.fillText('使 用', p.x + p.w / 2, p.y + p.h - 33, THEME.buttons.primary.textColor, THEME.font.subtitle.size, THEME.font.subtitle.weight)
+      r.drawButton({ x: p.x + (p.w - 120) / 2, y: p.y + p.h - 60, w: 120, h: 40, text: '使 用' }, 'primary')
     }
 
     if (this.toast) {

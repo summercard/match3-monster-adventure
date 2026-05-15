@@ -475,6 +475,54 @@ export class StorageManager {
     return this.savePlayer(player)
   }
 
+  // ===== 牧场系统相关 =====
+  // 牧场数据结构: { slots: [{ monsterId, placedAt }, ...], unlockedSlots: 3 }
+
+  getRanchState() {
+    return this.load('ranch', {
+      slots: [
+        { monsterId: null, placedAt: null },
+        { monsterId: null, placedAt: null },
+        { monsterId: null, placedAt: null }
+      ],
+      unlockedSlots: 3
+    })
+  }
+
+  setRanchState(state) {
+    return this.save('ranch', state)
+  }
+
+  // 计算挂机经验速率（每5分钟）
+  getIdleExpRate(monsterId) {
+    const level = this.getMonsterLevel(monsterId) || 1
+    return 2 + level * 0.5
+  }
+
+  // 收取单只怪物的挂机经验
+  collectIdleExp(monsterId) {
+    const ranch = this.getRanchState()
+    const slot = ranch.slots.find(s => s.monsterId === monsterId)
+    if (!slot || !slot.placedAt) return 0
+
+    const now = Date.now()
+    const elapsed = now - slot.placedAt
+    const intervals = Math.floor(elapsed / (5 * 60 * 1000))
+    if (intervals <= 0) return 0
+
+    const rate = this.getIdleExpRate(monsterId)
+    const exp = intervals * rate
+
+    // 增加经验
+    this.addMonsterExp(monsterId, exp)
+
+    // 重置放置时间
+    slot.placedAt = now
+    this.setRanchState(ranch)
+
+    return exp
+  }
+
   // ===== 新手引导相关 =====
   // 引导进度数据结构: { completed: true/false, currentStep: 0-5 }
 

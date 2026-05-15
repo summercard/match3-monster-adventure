@@ -3,6 +3,42 @@
 // ============================================
 import { THEME } from '../engine/theme.js'
 
+const MAIN_ASSETS = {
+  bg: 'assets/images/main/main_lobby_bg.png',
+  cardPrimary: 'assets/images/main/ui_card_primary.png',
+  cardPrimaryPressed: 'assets/images/main/ui_card_primary_pressed.png',
+  navFrame: 'assets/images/main/ui_nav_frame.png',
+  navFramePressed: 'assets/images/main/ui_nav_frame_pressed.png',
+  infoPanel: 'assets/images/main/ui_player_panel.png',
+  titlePlaque: 'assets/images/main/ui_title_plaque.png',
+  currencyCapsule: 'assets/images/main/ui_currency_capsule.png',
+  iconStart: 'assets/images/main/icon_start_adventure.png',
+  iconTeam: 'assets/images/main/icon_team.png',
+  iconAlbum: 'assets/images/main/icon_album.png',
+  iconSignin: 'assets/images/main/icon_signin.png',
+  iconShop: 'assets/images/main/icon_shop.png',
+  iconInventory: 'assets/images/main/icon_inventory.png',
+  iconRanch: 'assets/images/main/icon_ranch.png',
+  iconAchievement: 'assets/images/main/icon_achievement.png',
+  iconSettings: 'assets/images/main/icon_settings.png',
+  iconAvatar: 'assets/images/main/icon_avatar.png',
+  iconGold: 'assets/images/main/icon_gold.png',
+  iconDiamond: 'assets/images/main/icon_diamond.png',
+  iconExp: 'assets/images/main/icon_exp_star.png',
+}
+
+const BUTTON_ICON_KEYS = {
+  start: 'iconStart',
+  team: 'iconTeam',
+  album: 'iconAlbum',
+  signIn: 'iconSignin',
+  shop: 'iconShop',
+  inventory: 'iconInventory',
+  ranch: 'iconRanch',
+  achievement: 'iconAchievement',
+  settings: 'iconSettings',
+}
+
 export class SceneMain {
   constructor(game, data) {
     this.game = game
@@ -23,6 +59,10 @@ export class SceneMain {
     // Canvas 缓存（静态区域预渲染）
     this._bgCache = null      // 离屏 Canvas：背景+信息栏+标题
     this._bgCacheValid = false // 缓存是否需要刷新
+
+    // 大厅美术资源：背景、功能卡片、图标、玩家信息栏
+    this.artAssets = {}
+    this.artReady = false
   }
 
   init(data) {
@@ -30,6 +70,7 @@ export class SceneMain {
     this._loadPlayerData()
     this._buildButtons()
     this._initParticles()
+    this._loadArtAssets()
     this.game.input.onTap = this.tapCallback
     this.game.input.onTouchStart = this.touchStartCallback
     this.game.input.onTouchEnd = this.touchEndCallback
@@ -37,6 +78,33 @@ export class SceneMain {
 
     // 构建离屏 Canvas 缓存（静态区域）
     this._buildBgCache()
+  }
+
+  _loadArtAssets() {
+    if (this._artLoadingStarted) return
+    this._artLoadingStarted = true
+
+    const entries = Object.entries(MAIN_ASSETS)
+    let loadedCount = 0
+    this.artAssets = {}
+
+    entries.forEach(([key, src]) => {
+      const img = wx.createImage()
+      const item = { img, loaded: false, src }
+      this.artAssets[key] = item
+      img.onload = () => {
+        item.loaded = true
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+        this._bgCacheValid = false
+      }
+      img.onerror = () => {
+        console.warn(`[SceneMain] 美术资源加载失败: ${src}`)
+        loadedCount++
+        this.artReady = loadedCount >= entries.length
+      }
+      img.src = src
+    })
   }
 
   // ================================================
@@ -221,6 +289,7 @@ export class SceneMain {
       name: '冒险家',
       level: player.level || 1,
       gold: player.gold || 0,
+      gems: player.gems || 0,
       exp: player.exp || 0,
       // 升级所需经验：每100exp升1级
       expToLevel: 100
@@ -264,6 +333,7 @@ export class SceneMain {
     const secondaryBtns = [
       { id: 'shop', text: '🏪\n商店', emoji: '🏪', label: '商店', action: () => this._showShop() },
       { id: 'inventory', text: '🎒\n背包', emoji: '🎒', label: '背包', action: () => this._showInventory() },
+      { id: 'ranch', text: '🏡\n牧场', emoji: '🏡', label: '牧场', action: () => this._showRanch() },
       { id: 'achievement', text: '🏆\n成就', emoji: '🏆', label: '成就', action: () => this._showAchievement() },
       { id: 'settings', text: '⚙️\n设置', emoji: '⚙️', label: '设置', action: () => this._showSettings() },
     ]
@@ -316,6 +386,10 @@ export class SceneMain {
     this.game.sceneManager.changeScene('settings')
   }
 
+  _showRanch() {
+    this.game.sceneManager.changeScene('ranch')
+  }
+
   // ============================================
   // 按钮功能描述（长按 Toast）
   // ============================================
@@ -327,6 +401,7 @@ export class SceneMain {
       'signIn': '每日签到领取奖励',
       'shop': '购买道具和装备',
       'inventory': '查看和管理你的物品',
+      'ranch': '牧场挂机培养，怪物自动获得经验',
       'achievement': '查看冒险成就进度',
       'settings': '游戏设置和选项',
     }
@@ -413,19 +488,25 @@ export class SceneMain {
     const w = this.game.renderer.designWidth
     const h = this.game.renderer.designHeight
 
-    // ================================================
-    // 静态区域 Canvas 缓存（背景+标题+版本号）
-    // ================================================
-    if (this._bgCache === null || !this._bgCacheValid) {
-      this._buildBgCache()
-    }
+    if (this.artAssets.bg && this.artAssets.bg.loaded) {
+      this._drawImageCover(r, this.artAssets.bg.img, 0, 0, w, h)
+      r.fillRect(0, 0, w, h, 'rgba(6, 11, 28, 0.18)')
+      this._renderArtTitle(r, w, c, font)
+    } else {
+      // ================================================
+      // 静态区域 Canvas 缓存（背景+标题+版本号）
+      // ================================================
+      if (this._bgCache === null || !this._bgCacheValid) {
+        this._buildBgCache()
+      }
 
-    // 绘制缓存的静态背景（离屏 Canvas 已按 DPR 缩放，直接 drawImage 整个画布）
-    r.ctx.save()
-    r.ctx.setTransform(1, 0, 0, 1, 0, 0) // 重置变换，直接物理像素绘制
-    r.ctx.drawImage(this._bgCache, 0, 0)
-    r.ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0) // 恢复 DPR 变换
-    r.ctx.restore()
+      // 绘制缓存的静态背景（离屏 Canvas 已按 DPR 缩放，直接 drawImage 整个画布）
+      r.ctx.save()
+      r.ctx.setTransform(1, 0, 0, 1, 0, 0) // 重置变换，直接物理像素绘制
+      r.ctx.drawImage(this._bgCache, 0, 0)
+      r.ctx.setTransform(r.dpr, 0, 0, r.dpr, 0, 0) // 恢复 DPR 变换
+      r.ctx.restore()
+    }
 
     // ================================================
     // 动态绘制层（信息栏+粒子+按钮+Tooltip）
@@ -443,44 +524,7 @@ export class SceneMain {
 
     // === 绘制按钮 ===
     for (const btn of this.buttons) {
-      const type = btn.primary ? 'primary' : 'secondary'
-      const pressed = (this.touchedBtn === btn) ? THEME.buttons[type].pressScale : 1
-
-      if (btn.isGrid) {
-        // 2x2 网格主按钮：大尺寸，emoji 大号显示
-        const cx = btn.x + btn.w / 2
-        const cy = btn.y + btn.h / 2
-
-        // 背景卡片
-        r.fillRoundRect(btn.x, btn.y, btn.w, btn.h, THEME.radius.lg, btn.primary ? c.bgCard : c.bgDark, 0.95)
-
-        // 按钮按压效果
-        if (this.touchedBtn === btn) {
-          r.fillRoundRect(btn.x, btn.y, btn.w, btn.h, THEME.radius.lg, c.primary, 0.2)
-        }
-
-        // 大号 emoji 图标
-        const emojiSize = btn.primary ? font.display.size : font.icon.size
-        r.fillText(btn.emoji, cx, cy - 16, c.primary, emojiSize)
-
-        // 文字标签（emoji 下方）
-        const labelY = cy + 20
-        const lines = btn.text.split('\n')
-        if (lines.length >= 2) {
-          r.fillText(lines[1], cx, labelY, c.textPrimary, font.small.size, 'bold')
-        }
-
-      } else {
-        // 底部横排次要按钮：小尺寸，emoji + 文字标签
-        r.drawButton(btn, type, pressed)
-        // 在按钮下方绘制文字标签
-        const labelText = btn.label || ''
-        if (labelText) {
-          const cx = btn.x + btn.w / 2
-          const labelY = btn.y + btn.h + 4
-          r.fillText(labelText, cx, labelY, c.textSecondary, font.small.size, 'center')
-        }
-      }
+      this._renderLobbyButton(r, btn, c, font)
     }
 
     // === 长按 Tooltip ===
@@ -502,6 +546,90 @@ export class SceneMain {
     }
   }
 
+  _renderArtTitle(r, w, c, font) {
+    const plaque = this.artAssets.titlePlaque
+    if (plaque && plaque.loaded) {
+      this._drawImageFit(r, plaque.img, 101, 112, 174, 46, 0.96)
+    } else {
+      r.fillRoundRect(101, 112, 174, 46, THEME.radius.lg, c.bgCard, 0.86)
+    }
+
+    this._drawTextWithShadow(r, '冒 险 大 厅', w / 2, 132, c.textPrimary, font.subtitle.size, 'bold')
+    r.fillText('Monster Match Hub', w / 2, 160, c.textSecondary, font.tiny.size, 'center', 'normal')
+  }
+
+  _renderLobbyButton(r, btn, c, font) {
+    if (btn.isGrid) {
+      this._renderGridButton(r, btn, c, font)
+    } else {
+      this._renderNavButton(r, btn, c, font)
+    }
+  }
+
+  _renderGridButton(r, btn, c, font) {
+    const isPressed = this.touchedBtn === btn
+    const frame = isPressed ? this.artAssets.cardPrimaryPressed : this.artAssets.cardPrimary
+    const cx = btn.x + btn.w / 2
+    const cy = btn.y + btn.h / 2
+    const scale = isPressed ? 0.96 : 1
+    const drawW = btn.w * scale
+    const drawH = btn.h * scale
+    const drawX = btn.x + (btn.w - drawW) / 2
+    const drawY = btn.y + (btn.h - drawH) / 2
+
+    if (frame && frame.loaded) {
+      this._drawImageFit(r, frame.img, drawX, drawY, drawW, drawH, 0.98)
+    } else {
+      r.fillRoundRect(drawX, drawY, drawW, drawH, THEME.radius.lg, c.bgCard, 0.95)
+    }
+
+    if (isPressed) {
+      r.fillRoundRect(drawX, drawY, drawW, drawH, THEME.radius.lg, c.primary, 0.13)
+    }
+
+    const iconKey = BUTTON_ICON_KEYS[btn.id]
+    const iconAsset = iconKey ? this.artAssets[iconKey] : null
+    if (iconAsset && iconAsset.loaded) {
+      this._drawImageFit(r, iconAsset.img, cx - 34, cy - 48, 68, 68, 1)
+    } else {
+      r.fillText(btn.emoji, cx, cy - 22, c.primary, font.display.size)
+    }
+
+    const lines = btn.text.split('\n')
+    const label = lines.length >= 2 ? lines[1] : btn.text
+    this._drawTextWithShadow(r, label, cx, cy + 35, c.textPrimary, font.small.size, 'bold')
+  }
+
+  _renderNavButton(r, btn, c, font) {
+    const isPressed = this.touchedBtn === btn
+    const frame = isPressed ? this.artAssets.navFramePressed : this.artAssets.navFrame
+    const scale = isPressed ? 0.95 : 1
+    const drawW = btn.w * scale
+    const drawH = btn.h * scale
+    const drawX = btn.x + (btn.w - drawW) / 2
+    const drawY = btn.y + (btn.h - drawH) / 2
+    const cx = btn.x + btn.w / 2
+
+    if (frame && frame.loaded) {
+      this._drawImageFit(r, frame.img, drawX, drawY, drawW, drawH, 0.98)
+    } else {
+      r.drawButton(btn, 'secondary', isPressed ? THEME.buttons.secondary.pressScale : 1)
+    }
+
+    const iconKey = BUTTON_ICON_KEYS[btn.id]
+    const iconAsset = iconKey ? this.artAssets[iconKey] : null
+    if (iconAsset && iconAsset.loaded) {
+      this._drawImageFit(r, iconAsset.img, cx - 18, btn.y + 7, 36, 36, 1)
+    } else {
+      r.fillText(btn.emoji, cx, btn.y + 28, c.primary, font.icon.size)
+    }
+
+    const labelText = btn.label || ''
+    if (labelText) {
+      this._drawTextWithShadow(r, labelText, cx, btn.y + 54, c.textPrimary, font.tiny.size, 'bold')
+    }
+  }
+
   // ================================================
   // 渲染玩家信息栏（动态：每次 render 实时绘制）
   // ================================================
@@ -512,6 +640,7 @@ export class SceneMain {
     // 刷新玩家数据（金币可能每次都变）
     const player = this.game.storage.loadPlayer()
     this.player.gold = player.gold || 0
+    this.player.gems = player.gems || 0
     this.player.level = player.level || 1
     this.player.exp = player.exp || 0
 
@@ -522,6 +651,37 @@ export class SceneMain {
     const expBarW = w - 160
     const expBarH = 8
 
+    if (this.artAssets.infoPanel && this.artAssets.infoPanel.loaded) {
+      this._drawImageFit(r, this.artAssets.infoPanel.img, 6, 14, 226, 72, 0.94)
+
+      const avatarAsset = this.artAssets.iconAvatar
+      if (avatarAsset && avatarAsset.loaded) {
+        this._drawImageFit(r, avatarAsset.img, 13, 27, 46, 46, 1)
+      } else {
+        r.fillText('🎮', avatarX, avatarY, c.textPrimary, font.icon.size)
+      }
+
+      this._drawTextWithShadow(r, `冒险家  Lv.${this.player.level}`, 118, 38, c.textPrimary, font.body.size, 'bold')
+
+      const artExpX = 72
+      const artExpY = 62
+      const artExpW = 126
+      r.fillRoundRect(artExpX, artExpY, artExpW, expBarH, THEME.radius.sm, 'rgba(20, 64, 132, 0.62)')
+      if (expProgress > 0) {
+        const fillW = Math.floor((artExpW - 4) * expProgress)
+        r.fillRoundRect(artExpX + 2, artExpY + 2, fillW, expBarH - 4, THEME.radius.sm - 1, c.primary)
+      }
+      const expAsset = this.artAssets.iconExp
+      if (expAsset && expAsset.loaded) {
+        this._drawImageFit(r, expAsset.img, 51, 54, 24, 24, 1)
+      }
+      r.fillText(`${this.player.exp}/${this.player.expToLevel}`, 206, 66, c.textPrimary, font.tiny.size, 'left', 'bold')
+
+      this._renderCurrency(r, 250, 29, 'iconGold', this._formatNumber(this.player.gold), c.gold)
+      this._renderCurrency(r, 250, 55, 'iconDiamond', this._formatNumber(this.player.gems), c.primaryLight)
+      return
+    }
+
     // 经验条填充（覆盖缓存中的空进度条）
     if (expProgress > 0) {
       const fillW = Math.floor((expBarW - 4) * expProgress)
@@ -531,6 +691,68 @@ export class SceneMain {
     // 金币文字（覆盖缓存中的金币值）
     const goldX = w - 120
     r.fillText('💰 ' + this._formatNumber(this.player.gold), goldX, avatarY - 4, c.gold, font.number.size, 'bold')
+  }
+
+  _renderCurrency(r, x, y, iconKey, value, color) {
+    const capsule = this.artAssets.currencyCapsule
+    if (capsule && capsule.loaded) {
+      this._drawImageFit(r, capsule.img, x, y - 13, 112, 24, 0.92)
+    } else {
+      r.fillRoundRect(x, y - 13, 112, 24, 12, 'rgba(8, 16, 36, 0.72)')
+    }
+
+    const icon = this.artAssets[iconKey]
+    if (icon && icon.loaded) {
+      this._drawImageFit(r, icon.img, x + 5, y - 14, 26, 26, 1)
+    }
+    r.fillText(value, x + 104, y, color, THEME.font.small.size, 'right', 'bold')
+  }
+
+  _drawTextWithShadow(r, text, x, y, color, fontSize, weight = 'bold') {
+    r.fillText(text, x + 1, y + 2, 'rgba(0,0,0,0.55)', fontSize, 'center', weight)
+    r.fillText(text, x, y, color, fontSize, 'center', weight)
+  }
+
+  _drawImageFit(r, img, x, y, w, h, opacity = 1) {
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(
+      img,
+      x * r.scaleX,
+      y * r.scaleY,
+      w * r.scaleX,
+      h * r.scaleY
+    )
+    r.ctx.restore()
+  }
+
+  _drawImageCover(r, img, x, y, w, h, opacity = 1) {
+    const srcRatio = img.width / img.height
+    const dstRatio = w / h
+    let sx = 0
+    let sy = 0
+    let sw = img.width
+    let sh = img.height
+
+    if (srcRatio > dstRatio) {
+      sw = img.height * dstRatio
+      sx = (img.width - sw) / 2
+    } else {
+      sh = img.width / dstRatio
+      sy = (img.height - sh) / 2
+    }
+
+    r.ctx.save()
+    r.ctx.globalAlpha *= opacity
+    r.ctx.drawImage(
+      img,
+      sx, sy, sw, sh,
+      x * r.scaleX,
+      y * r.scaleY,
+      w * r.scaleX,
+      h * r.scaleY
+    )
+    r.ctx.restore()
   }
 
   destroy() {

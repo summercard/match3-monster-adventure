@@ -23,7 +23,7 @@
 - [x] **A3** L/T形消除（炸弹宝石）✅ 已深完成
 - [x] **B1** 障碍物格子（石块/冰块）✅ 已完成
 - [x] **C1** 敌人特殊行为（Boss蓄力/护盾/回血）✅ 已完成
-- [ ] **D1** 精英关卡（特殊棋盘布局）
+- [x] **D1** 精英关卡（特殊棋盘布局）✅ Cycle 166 (Ch2~Ch11共10个)
 
 ### 目标1: 游戏流程闭环
 确保从启动到结算的完整流程顺畅无卡死：
@@ -62,12 +62,12 @@
 - [x] **P0.1.7** 剩余场景（sceneSignIn 3处粒子色 + sceneBattlePrepare 2处Boss色 + sceneBattle 6处#ffffff → 全部清零，P0.1完成）
 
 ### P0.2 字体规范
-- [ ] **P0.2.1** 在 `theme.js` 添加字体规范常量（FONT_TITLE / FONT_SUBTITLE / FONT_BODY / FONT_SMALL / FONT_NUMBER）
-- [ ] **P0.2.2** 所有场景替换 `fillText` 的字号参数为 THEME 字体常量
+- [x] **P0.2.1** 在 `theme.js` 添加字体规范常量（FONT_TITLE / FONT_SUBTITLE / FONT_BODY / FONT_SMALL / FONT_NUMBER）✅ Cycle 159
+- [x] **P0.2.2** 所有场景替换 `fillText` 的字号参数为 THEME 字体常量 ✅ Cycle 160-161（sceneTutorial/sceneMain/sceneStart/sceneStageSelect/sceneBattle 等全部替换）
 
 ### P0.3 按钮样式统一
-- [ ] **P0.3.1** 在 `theme.js` 添加按钮规范，创建通用 `drawButton(renderer, btn, type)` 方法（主/次/危险三种样式）
-- [ ] **P0.3.2** `sceneMain.js` + `sceneStart.js` 按钮改用 `drawButton`
+- [x] **P0.3.1** 在 `theme.js` 添加按钮规范，创建通用 `drawButton(renderer, btn, type)` 方法（主/次/危险三种样式）✅ 已存在于 renderer.js + theme.js
+- [x] **P0.3.2** `sceneMain.js` + `sceneStart.js` 按钮改用 `drawButton` ✅ sceneMain已用, sceneStart仅glow按钮(特殊效果保留)
 - [ ] **P0.3.3** 其余所有场景按钮改用 `drawButton`
 
 ### P0.4 背景统一

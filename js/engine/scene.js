@@ -17,6 +17,7 @@ import { SceneSignIn } from '../ui/sceneSignIn.js'
 import { SceneAchievement } from '../ui/sceneAchievement.js'
 import { SceneSettings } from '../ui/sceneSettings.js'
 import { SceneTutorial } from '../ui/sceneTutorial.js'
+import { SceneRanch } from '../ui/sceneRanch.js'
 
 const SCENE_CLASSES = {
   start: SceneStart,
@@ -33,7 +34,8 @@ const SCENE_CLASSES = {
   signIn: SceneSignIn,
   achievement: SceneAchievement,
   settings: SceneSettings,
-  tutorial: SceneTutorial
+  tutorial: SceneTutorial,
+  ranch: SceneRanch
 }
 
 export class SceneManager {

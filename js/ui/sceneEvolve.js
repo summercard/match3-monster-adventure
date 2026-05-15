@@ -237,19 +237,18 @@ export class SceneEvolve {
     }
 
     // 标题
-    r.fillText('🔄 怪物进化', this.designW / 2, 40, COLORS.textPrimary, 18, 'bold')
+    r.fillText('🔄 怪物进化', this.designW / 2, 40, COLORS.textPrimary, THEME.font.subtitle.size, THEME.font.subtitle.weight)
 
     // 返回按钮
-    r.fillRoundRect(this.backBtn.x, this.backBtn.y, this.backBtn.w, this.backBtn.h, THEME.radius.sm, THEME.buttons.secondary.bgColor)
-    r.fillText('← 返回', this.backBtn.x + this.backBtn.w / 2, this.backBtn.y + 20, COLORS.textPrimary, 12)
+    r.drawButton({ x: this.backBtn.x, y: this.backBtn.y, w: this.backBtn.w, h: this.backBtn.h, text: '← 返回' }, 'secondary')
 
     if (!this.monsterData) {
-      r.fillText('未选择怪物', this.designW / 2, this.designH / 2, COLORS.textMuted, 14)
+      r.fillText('未选择怪物', this.designW / 2, this.designH / 2, COLORS.textMuted, THEME.font.body.size)
       return
     }
 
     if (!this.evolvedMonster) {
-      r.fillText('该怪物无法进化', this.designW / 2, this.designH / 2, COLORS.textMuted, 14)
+      r.fillText('该怪物无法进化', this.designW / 2, this.designH / 2, COLORS.textMuted, THEME.font.body.size)
       return
     }
 
@@ -274,22 +273,22 @@ export class SceneEvolve {
 
     // 当前形态
     const currentY = cy - 100
-    r.fillText('当前形态', cx, currentY, COLORS.textMuted, 12)
+    r.fillText('当前形态', cx, currentY, COLORS.textMuted, THEME.font.small.size)
     this._renderMonsterCard(r, cx - 60, currentY + 15, this.monsterData, 120, 140)
 
     // 箭头
     const arrowY = cy - 30
-    r.fillText('⬇️', cx, arrowY, COLORS.textPrimary, 24)
+    r.fillText('⬇️', cx, arrowY, COLORS.textPrimary, THEME.font.title.size)
 
     // 进化后形态
     const evolveY = cy + 30
-    r.fillText('进化后', cx, evolveY, COLORS.gold, 12)
+    r.fillText('进化后', cx, evolveY, COLORS.gold, THEME.font.small.size)
     this._renderMonsterCard(r, cx - 60, evolveY + 15, this.evolvedMonster, 120, 140)
 
     // 进化条件
     const condY = evolveY + 175
     r.fillRoundRect(20, condY, this.designW - 40, 50, THEME.radius.md, COLORS.bgCard)
-    r.fillText(this.conditionText, cx, condY + 30, this.canEvolve ? COLORS.success : COLORS.danger, 13)
+    r.fillText(this.conditionText, cx, condY + 30, this.canEvolve ? COLORS.success : COLORS.danger, THEME.font.small.size)
 
     // 进化按钮
     const btnY = this.designH - 100
@@ -299,11 +298,9 @@ export class SceneEvolve {
     this.evolveBtn.h = 50
 
     if (this.canEvolve) {
-      r.fillRoundRect(this.evolveBtn.x, this.evolveBtn.y, this.evolveBtn.w, this.evolveBtn.h, THEME.radius.md, COLORS.evolveReady)
-      r.fillText('✨ 开始进化 ✨', cx, btnY + 32, COLORS.textPrimary, 16, 'bold')
+      r.drawButton({ x: this.evolveBtn.x, y: this.evolveBtn.y, w: this.evolveBtn.w, h: this.evolveBtn.h, text: '✨ 开始进化 ✨' }, 'primary')
     } else {
-      r.fillRoundRect(this.evolveBtn.x, this.evolveBtn.y, this.evolveBtn.w, this.evolveBtn.h, THEME.radius.md, COLORS.disabledBg)
-      r.fillText('条件不足', cx, btnY + 32, COLORS.textMuted, 16)
+      r.drawButton({ x: this.evolveBtn.x, y: this.evolveBtn.y, w: this.evolveBtn.w, h: this.evolveBtn.h, text: '条件不足' }, 'secondary')
     }
   }
 
@@ -315,20 +312,20 @@ export class SceneEvolve {
     r.strokeRect(x, y, w, h, 2, elementColor)
 
     // Emoji
-    r.fillText(monster.emoji, x + w / 2, y + 45, COLORS.textPrimary, 40)
+    r.fillText(monster.emoji, x + w / 2, y + 45, COLORS.textPrimary, THEME.font.display.size)
 
     // 名字
-    r.fillText(monster.name, x + w / 2, y + 80, COLORS.textPrimary, 13, 'bold')
+    r.fillText(monster.name, x + w / 2, y + 80, COLORS.textPrimary, THEME.font.small.size, 'bold')
 
     // 稀有度
     const stars = '★'.repeat(monster.rarity)
-    r.fillText(stars, x + w / 2, y + 100, COLORS.gold, 10)
+    r.fillText(stars, x + w / 2, y + 100, COLORS.gold, THEME.font.tiny.size)
 
     // 属性标签
     const tagX = x + w / 2
     const tagY = y + 120
     r.fillRoundRect(tagX - 25, tagY, 50, 18, THEME.radius.sm, elementColor)
-    r.fillText(this.elementNames[monster.element] || monster.element, tagX, tagY + 13, COLORS.textPrimary, 11, 'bold')
+    r.fillText(this.elementNames[monster.element] || monster.element, tagX, tagY + 13, COLORS.textPrimary, THEME.font.tiny.size, 'bold')
   }
 
   _renderEvolutionAnim(r) {
@@ -347,23 +344,23 @@ export class SceneEvolve {
     if (progress < 0.6) {
       // 当前形态淡出
       const fadeOut = 1 - progress / 0.6
-      r.fillText(this.monsterData.emoji, cx, cy, `rgba(255,255,255,${fadeOut})`, 48)
+      r.fillText(this.monsterData.emoji, cx, cy, `rgba(255,255,255,${fadeOut})`, THEME.font.display.size)
     }
     if (progress > 0.4) {
       // 进化后形态淡入
       const fadeIn = (progress - 0.4) / 0.6
-      r.fillText(this.evolvedMonster.emoji, cx, cy, `rgba(255,255,255,${fadeIn})`, 48)
+      r.fillText(this.evolvedMonster.emoji, cx, cy, `rgba(255,255,255,${fadeIn})`, THEME.font.display.size)
     }
 
     // 进度文字
-    r.fillText('进化中...', cx, cy + 80, COLORS.gold, 14)
+    r.fillText('进化中...', cx, cy + 80, COLORS.gold, THEME.font.body.size)
   }
 
   _renderEvolveComplete(r) {
     const cx = this.designW / 2
     const cy = this.designH / 2 - 60
 
-    r.fillText('🎉 进化成功！', cx, cy - 80, COLORS.gold, 20, 'bold')
+    r.fillText('🎉 进化成功！', cx, cy - 80, COLORS.gold, THEME.font.bigNum.size, THEME.font.bigNum.weight)
 
     // 进化后的怪物
     this._renderMonsterCard(r, cx - 70, cy - 50, this.evolvedMonster, 140, 160)
@@ -374,14 +371,14 @@ export class SceneEvolve {
 
     const statsX1 = 60
     const statsX2 = 200
-    r.fillText(`${this.monsterData.name} → ${this.evolvedMonster.name}`, cx, statsY + 20, COLORS.textPrimary, 12, 'bold')
+    r.fillText(`${this.monsterData.name} → ${this.evolvedMonster.name}`, cx, statsY + 20, COLORS.textPrimary, THEME.font.small.size, THEME.font.small.weight)
 
     const oldStats = `${this.monsterData.baseHP}/${this.monsterData.baseATK}/${this.monsterData.baseDEF}/${this.monsterData.baseSPD}`
     const newStats = `${this.evolvedMonster.baseHP}/${this.evolvedMonster.baseATK}/${this.evolvedMonster.baseDEF}/${this.evolvedMonster.baseSPD}`
 
-    r.fillText('HP/ATK/DEF/SPD', cx, statsY + 45, COLORS.textMuted, 10)
-    r.fillText(`基础: ${oldStats}`, cx, statsY + 65, COLORS.textSecondary, 10)
-    r.fillText(`进化后: ${newStats}`, cx, statsY + 85, COLORS.success, 11, 'bold')
+    r.fillText('HP/ATK/DEF/SPD', cx, statsY + 45, COLORS.textMuted, THEME.font.tiny.size)
+    r.fillText(`基础: ${oldStats}`, cx, statsY + 65, COLORS.textSecondary, THEME.font.tiny.size)
+    r.fillText(`进化后: ${newStats}`, cx, statsY + 85, COLORS.success, THEME.font.tiny.size, 'bold')
 
     // 返回按钮
     const btnY = this.designH - 100
@@ -390,8 +387,7 @@ export class SceneEvolve {
     this.evolveBtn.w = 160
     this.evolveBtn.h = 50
 
-    r.fillRoundRect(this.evolveBtn.x, this.evolveBtn.y, this.evolveBtn.w, this.evolveBtn.h, THEME.radius.md, THEME.buttons.secondary.bgColor)
-    r.fillText('返回图鉴', cx, btnY + 32, COLORS.textPrimary, 16, 'bold')
+    r.drawButton({ x: this.evolveBtn.x, y: this.evolveBtn.y, w: this.evolveBtn.w, h: this.evolveBtn.h, text: '返回图鉴' }, 'secondary')
   }
 
   destroy() {

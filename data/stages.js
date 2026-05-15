@@ -252,6 +252,31 @@ export const STAGES_DATA = {
           ]
         },
         {
+          "id": "stage_4_3e",
+          "name": "精英·沙漠蜃影",
+          "type": "elite",
+          "enemies": ["enemy_011", "enemy_011"],
+          "enemyLevel": 15,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 220, "exp": 130 },
+          "obstacles": [
+            { "row": 0, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 0, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 0, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 3, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 4, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 7, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 6, "col": 0, "type": "rock", "hp": 2 },
+            { "row": 6, "col": 7, "type": "rock", "hp": 2 }
+          ],
+          "poisonFog": {
+            "tiles": [{ "row": 3, "col": 1 }, { "row": 5, "col": 6 }],
+            "spreadInterval": 5
+          }
+        },
+        {
           "id": "stage_4_5",
           "name": "暗影巨龙",
           "type": "boss",
@@ -308,6 +333,27 @@ export const STAGES_DATA = {
           "enemies": ["enemy_012", "enemy_016", "enemy_013"],
           "enemyLevel": 19,
           "rewards": { "gold": 160, "exp": 105 }
+        },
+        {
+          "id": "stage_5_3e",
+          "name": "精英·雷暴守卫",
+          "type": "elite",
+          "enemies": ["enemy_014", "enemy_016"],
+          "enemyLevel": 20,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 260, "exp": 155 },
+          "lockedGems": [
+            { "row": 0, "col": 1, "hp": 2 },
+            { "row": 0, "col": 6, "hp": 2 },
+            { "row": 2, "col": 0, "hp": 2 },
+            { "row": 2, "col": 3, "hp": 2 },
+            { "row": 2, "col": 4, "hp": 2 },
+            { "row": 2, "col": 7, "hp": 2 },
+            { "row": 4, "col": 1, "hp": 2 },
+            { "row": 4, "col": 6, "hp": 2 },
+            { "row": 6, "col": 0, "hp": 2 },
+            { "row": 6, "col": 7, "hp": 2 }
+          ]
         },
         {
           "id": "stage_5_5",
@@ -372,6 +418,33 @@ export const STAGES_DATA = {
           }
         },
         {
+          "id": "stage_6_3e",
+          "name": "精英·深渊使者",
+          "type": "elite",
+          "enemies": ["enemy_020", "enemy_021"],
+          "enemyLevel": 25,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 300, "exp": 175 },
+          "obstacles": [
+            { "row": 1, "col": 1, "type": "rock", "hp": 2 },
+            { "row": 1, "col": 6, "type": "rock", "hp": 2 },
+            { "row": 3, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 3, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 5, "col": 1, "type": "rock", "hp": 2 },
+            { "row": 5, "col": 6, "type": "rock", "hp": 2 }
+          ],
+          "lockedGems": [
+            { "row": 2, "col": 3, "hp": 2 },
+            { "row": 2, "col": 4, "hp": 2 },
+            { "row": 4, "col": 3, "hp": 2 },
+            { "row": 4, "col": 4, "hp": 2 }
+          ],
+          "poisonFog": {
+            "tiles": [{ "row": 0, "col": 0 }, { "row": 0, "col": 7 }, { "row": 7, "col": 0 }, { "row": 7, "col": 7 }],
+            "spreadInterval": 3
+          }
+        },
+        {
           "id": "stage_6_5",
           "name": "冰霜巨龙",
           "type": "boss",
@@ -416,6 +489,34 @@ export const STAGES_DATA = {
           "enemies": ["enemy_024", "enemy_025", "enemy_026"],
           "enemyLevel": 28,
           "rewards": { "gold": 160, "exp": 100 }
+        },
+        {
+          "id": "stage_7_3e",
+          "name": "精英·虚空裂隙",
+          "type": "elite",
+          "enemies": ["enemy_025", "enemy_026"],
+          "enemyLevel": 30,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 270, "exp": 155 },
+          "obstacles": [
+            { "row": 1, "col": 4, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 3, "type": "rock", "hp": 2 },
+            { "row": 2, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 3, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 3, "col": 6, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 3, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 5, "col": 4, "type": "rock", "hp": 2 }
+          ],
+          "poisonFog": {
+            "tiles": [
+              { "row": 0, "col": 0 },
+              { "row": 0, "col": 7 },
+              { "row": 7, "col": 0 },
+              { "row": 7, "col": 7 }
+            ],
+            "spreadInterval": 3
+          }
         },
         {
           "id": "stage_7_4",
@@ -468,6 +569,27 @@ export const STAGES_DATA = {
           "rewards": { "gold": 170, "exp": 110 }
         },
         {
+          "id": "stage_8_3e",
+          "name": "精英·时空漩涡",
+          "type": "elite",
+          "enemies": ["enemy_030", "enemy_031"],
+          "enemyLevel": 35,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 320, "exp": 180 },
+          "obstacles": [
+            { "row": 3, "col": 3, "type": "rock", "hp": 2 },
+            { "row": 3, "col": 4, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 3, "type": "rock", "hp": 2 },
+            { "row": 4, "col": 4, "type": "rock", "hp": 2 }
+          ],
+          "lockedGems": [
+            { "row": 0, "col": 0, "hp": 2 },
+            { "row": 0, "col": 7, "hp": 2 },
+            { "row": 7, "col": 0, "hp": 2 },
+            { "row": 7, "col": 7, "hp": 2 }
+          ]
+        },
+        {
           "id": "stage_8_4",
           "name": "时空迷宫",
           "type": "normal",
@@ -516,6 +638,41 @@ export const STAGES_DATA = {
           "enemies": ["enemy_034", "enemy_035", "enemy_036"],
           "enemyLevel": 38,
           "rewards": { "gold": 180, "exp": 120 }
+        },
+        {
+          "id": "stage_9_3e",
+          "name": "精英·星耀祭坛",
+          "type": "elite",
+          "enemies": ["enemy_035", "enemy_036"],
+          "enemyLevel": 40,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 370, "exp": 200 },
+          "obstacles": [
+            { "row": 0, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 0, "col": 5, "type": "rock", "hp": 2 },
+            { "row": 1, "col": 0, "type": "rock", "hp": 2 },
+            { "row": 1, "col": 7, "type": "rock", "hp": 2 },
+            { "row": 6, "col": 0, "type": "rock", "hp": 2 },
+            { "row": 6, "col": 7, "type": "rock", "hp": 2 },
+            { "row": 7, "col": 2, "type": "rock", "hp": 2 },
+            { "row": 7, "col": 5, "type": "rock", "hp": 2 }
+          ],
+          "poisonFog": {
+            "tiles": [
+              { "row": 2, "col": 3 },
+              { "row": 3, "col": 3 },
+              { "row": 4, "col": 3 },
+              { "row": 5, "col": 3 },
+              { "row": 3, "col": 1 },
+              { "row": 3, "col": 2 },
+              { "row": 3, "col": 5 },
+              { "row": 3, "col": 6 },
+              { "row": 4, "col": 4 },
+              { "row": 4, "col": 5 },
+              { "row": 4, "col": 6 }
+            ],
+            "spreadInterval": 4
+          }
         },
         {
           "id": "stage_9_4",
@@ -576,6 +733,35 @@ export const STAGES_DATA = {
           "rewards": { "gold": 205, "exp": 140 }
         },
         {
+          "id": "stage_10_4e",
+          "name": "精英·混沌祭坛",
+          "type": "elite",
+          "enemies": ["enemy_039", "enemy_040", "enemy_041"],
+          "enemyLevel": 43,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 350, "exp": 195 },
+          "obstacles": [
+            { "row": 2, "col": 3, "type": "rock", "hp": 3 },
+            { "row": 2, "col": 4, "type": "rock", "hp": 3 },
+            { "row": 3, "col": 3, "type": "rock", "hp": 3 },
+            { "row": 3, "col": 4, "type": "rock", "hp": 3 },
+            { "row": 4, "col": 3, "type": "rock", "hp": 3 },
+            { "row": 4, "col": 4, "type": "rock", "hp": 3 },
+            { "row": 5, "col": 3, "type": "rock", "hp": 3 },
+            { "row": 5, "col": 4, "type": "rock", "hp": 3 }
+          ],
+          "lockedGems": [
+            { "row": 0, "col": 0, "hp": 2 },
+            { "row": 0, "col": 7, "hp": 2 },
+            { "row": 1, "col": 0, "hp": 2 },
+            { "row": 1, "col": 7, "hp": 2 },
+            { "row": 6, "col": 0, "hp": 2 },
+            { "row": 6, "col": 7, "hp": 2 },
+            { "row": 7, "col": 0, "hp": 2 },
+            { "row": 7, "col": 7, "hp": 2 }
+          ]
+        },
+        {
           "id": "stage_10_5",
           "name": "混沌兽神",
           "type": "boss",
@@ -624,6 +810,42 @@ export const STAGES_DATA = {
           "enemies": ["enemy_042", "enemy_046", "enemy_045"],
           "enemyLevel": 49,
           "rewards": { "gold": 210, "exp": 145 }
+        },
+        {
+          "id": "stage_11_4e",
+          "name": "精英·光耀祭坛",
+          "type": "elite",
+          "enemies": ["enemy_044", "enemy_045", "enemy_046"],
+          "enemyLevel": 48,
+          "eliteMultiplier": 1.5,
+          "rewards": { "gold": 380, "exp": 220 },
+          "obstacles": [
+            { "row": 2, "col": 2, "type": "rock", "hp": 3 },
+            { "row": 2, "col": 5, "type": "rock", "hp": 3 },
+            { "row": 5, "col": 2, "type": "rock", "hp": 3 },
+            { "row": 5, "col": 5, "type": "rock", "hp": 3 }
+          ],
+          "poisonFog": {
+            "tiles": [
+              { "row": 0, "col": 0 },
+              { "row": 0, "col": 1 },
+              { "row": 0, "col": 6 },
+              { "row": 0, "col": 7 },
+              { "row": 1, "col": 0 },
+              { "row": 1, "col": 7 },
+              { "row": 1, "col": 2 },
+              { "row": 1, "col": 5 },
+              { "row": 2, "col": 3 },
+              { "row": 2, "col": 4 },
+              { "row": 5, "col": 3 },
+              { "row": 5, "col": 4 },
+              { "row": 6, "col": 2 },
+              { "row": 6, "col": 5 },
+              { "row": 7, "col": 0 },
+              { "row": 7, "col": 7 }
+            ],
+            "spreadInterval": 3
+          }
         },
         {
           "id": "stage_11_5",
